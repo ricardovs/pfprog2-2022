@@ -55,11 +55,19 @@ Esse sistema se assenta sobre as seguintes premissas:  a palavra ser enviada sec
 
 ## Instalação
 
-Em desenvolvimento ...
+A DApp roda em um servidor Web, logo as seguintes bibliotecas serão necessárias:
+```
+npm install connect serve-static
+```
 
 ## Uso
 
-Em desenvolvimento ...
+Para executar o código basta rodar:
+```
+node app.js
+```
+
+Feito isso, você abrirá seu html no browser usando a url: [http://localhost:3000/index.html](http://localhost:3000/index.html).
 
 ## Suporte
 

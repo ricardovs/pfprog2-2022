@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <!-- Importing css styles -->
+    <link rel="stylesheet" href="./index.css" />
+    <title>Turing DApp</title>
+  </head>
+  <body>
+    <!-- Initial Message -->
+    <div id="initial-message">
+      <div class="section-header">
+        <h1> Turing DApp</h1>
+      </div>
+      <div class="initial-message-form">
+        <h1> Hi folks !</h1>
+        <br/>
+        <p> Please connect to your MetaMask Wallet before proceeding !</p>
+      </div>
+    </div>
+    <!-- Account Selector -->
+    <div id="user-account-footer">
+      <div class="user-account-message section-header">
+        <h3> User Address</h3>
+      </div>
+      <select name="user-account-address" id="user-account-address" onchange="updatedSignerContract();" ></select>
+    </div>
+    <!-- Importing Ethers.js script -->
+    <script
+      src="https://cdn.ethers.io/lib/ethers-5.2.umd.min.js"
+      type="application/javascript"
+    ></script>
+    <!-- Importing our AES javascript library -->
+    <script src="./jsaes.js"></script>
+    <!-- Importing our javascript file -->
+    <script src="./index.js"></script>
+  </body>
+</html>

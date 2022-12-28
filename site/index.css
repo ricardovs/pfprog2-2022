@@ -1,0 +1,246 @@
+/* Reset browser styles */
+* {
+margin: 0;
+box-sizing: border-box;
+}
+
+body
+{
+font-family: Arial;
+line-height: 1.5;
+color: #333333;
+display: flex;
+justify-content: center;
+flex-direction: column;
+min-height: 100vh;
+max-width: 500px;
+margin:  0 auto;
+padding: 0 20px;
+}
+
+.section-header
+{
+font-size: 1.5rem;
+font-weight: bold;
+margin-bottom: 1rem;
+background-color: #333333;
+color: #ffffff;
+padding: 0.5rem 1rem;
+border-radius: 0.25rem;
+text-align: center;
+}
+
+form,
+#user-account-footer,
+.initial-message-form
+{
+padding: 20px;
+border-radius: 5px;
+box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+}
+
+.form-line
+{
+display: flex;
+margin: 5px;
+gap : 5px;
+align-items: center;
+}
+
+.form-section
+{
+border: #eee;
+border-width: 1px;
+border-style: solid;
+padding: 10px;
+font-size: 24px;
+}
+
+label
+{
+font-size: 1em;
+display: block;
+margin-bottom: 5px;
+}
+
+input
+{
+width: 100%;
+border: 1px solid #cccccc;
+border-radius: 5px;
+padding: 10px;
+font-size: 16px;
+}
+
+input[type=button]
+{
+border: 1px solid #333333;
+color: #fff;
+cursor: pointer;
+font-size: 24px;
+}
+
+select
+{
+padding: 5px;
+font-size: 16px;
+}
+
+.form-line > select
+{
+width: 100%;
+margin-top: 0px;
+}
+
+.form-line > h3
+{
+font-size: 14px;
+}
+
+#user-account-footer
+{
+margin-top: 10px;
+}
+
+#user-account-address
+{
+width: 100%;
+}
+
+.amount-unit
+{
+width: auto;
+padding: 10px;
+}
+
+.green-background
+{
+    background-color: #4CAF50;
+}
+
+.yellow-background
+{
+background-color: #FFA000;
+}
+
+.btn-back-main-menu,
+.red-background
+{
+background-color: #990033;
+}
+
+.btn-stats-refresh,
+.blue-background
+{
+background-color: #0066CC;
+}
+
+#user-account-footer
+{
+display: none;
+}
+
+.main-menu-form > input
+{
+margin-bottom: 10px;
+}
+
+.section-footer
+{
+display: flex;
+gap: 12px;
+margin-top: 10px;
+}
+
+.section-footer > button
+{
+width: 50%;
+padding: 10px;
+border: none;
+border-radius: 5px;
+color: #fff;
+cursor: pointer;
+font-size: 18px;
+}
+
+.end-voting-menu-form > input
+{
+font-size: 25px;
+height: 70px
+}
+
+.end-voting-message
+{
+font-size: 1.5em;
+text-align: center;
+margin-bottom: 0.7em;
+}
+
+.user-account-message
+{
+font-size: 1.5em;
+text-align: center;
+display : inherit;
+}
+
+#initial-message p
+{
+font-size: 1.7em;
+}
+
+#initial-message h1
+{
+font-size: 2.5em;
+}
+
+
+.styled-table
+{
+border-collapse: collapse;
+margin: 25px 0;
+font-size: 0.9em;
+font-family: sans-serif;
+min-width: 450px;
+box-shadow: 0 0 20px rgba(0, 0, 0, 0.15);
+}
+
+.styled-table thead tr
+{
+background-color: #003366;
+color: #ffffff;
+text-align: center;
+}
+
+.styled-table thead tr,
+.styled-table thead td,
+.styled-table thead th
+{
+border: 1px solid white;
+}
+
+.styled-table th,
+.styled-table td
+{
+padding: 12px 15px;
+}
+
+.styled-table tbody tr
+{
+border-bottom: 1px solid #dddddd;
+}
+
+.styled-table tbody tr:nth-of-type(even)
+{
+background-color: #f3f3f3;
+}
+
+.styled-table tbody tr:last-of-type
+{
+border-bottom: 2px solid #003366;
+}
+
+.styled-table tbody tr.active-row
+{
+font-weight: bold;
+color: #009879;
+}
