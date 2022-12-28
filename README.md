@@ -1,92 +1,70 @@
 # PFProg2-2022
 
+## Introdução
 
+Projeto Final apresentado na disciplina de Tópicos Especiais de Programação 2022/2.
 
-## Getting started
+## Especificação
 
-To make it easy for you to get started with GitLab, here's a list of recommended next steps.
+### REQUISITOS DO PROJETO
 
-Already a pro? Just edit this README.md and make it your own. Want to make it easy? [Use the template at the bottom](#editing-this-readme)!
+1. Criar uma dApp com uma ou mais interfaces que ajudem o usuário a interagir com o contrato inteligente.
+    - Esta dApp deve ser acessada via http em alguma das máquinas locais do Labgrad3 OU nuvem pública
+    - O(s) contrato(s) deve(m) ser implantado(s) em uma rede de teste pública
+    - Todos os códigos devem ser disponibilizados via github
+2. O contrato inteligente deve usar *modifers* para testar a execução inicial de funções
+3. Seu contrato deve emitir evento(s), e a sua interface deve capturar essse(s) evento(s) reagindo de alguma forma a ele(s)
+    - INFORMAÇÕES ADICIONAIS
+        - [Solidity - Events](https://www.w3schools.io/blockchain/solidity-events/)
+4. Contract Factory
+    - Seu contrato princial deve funcionar como um Contract Factory, sendo capaz de criar  novos contratos
+    - Seu contrato principal deve Interagir com um dos contratos criados por ele
+    - INFORMAÇÕES ADICIONAIS
+        - Básico:
+            - [INTERACT WITH OTHER CONTRACTS FROM SOLIDITY](https://ethereum.org/pt-br/developers/tutorials/interact-with-other-contracts-from-solidity/)
+        - Avançado:
+            - [How to Create a Smart Contract Factory in Solidity using Hardhat](https://www.quicknode.com/guides/smart-contract-development/how-to-create-a-smart-contract-factory-in-solidity-using-hardhat)
+            - [Hardhat Tutorial](https://hardhat.org/tutorial)
 
-## Add your files
+#### REQUISITO EXTRA
 
-- [ ] [Create](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#create-a-file) or [upload](https://docs.gitlab.com/ee/user/project/repository/web_editor.html#upload-a-file) files
-- [ ] [Add files using the command line](https://docs.gitlab.com/ee/gitlab-basics/add-file.html#add-a-file-using-the-command-line) or push an existing Git repository with the following command:
+- Utilizar alguma ferramenta de Unit test
+    - INFORMAÇÕES ADICIONAIS
+        - Básico (+10%): [Remix Unit testing plugin](https://remix-ide.readthedocs.io/en/latest/unittesting.html#)
+        - Avançado (+20%): [Testing contracts with Hardhat/Mocha](https://hardhat.org/tutorial/testing-contracts)
 
-```
-cd existing_repo
-git remote add origin https://git.ufes.br/ricardo.silva.07/pfprog2-2022.git
-git branch -M main
-git push -uf origin main
-```
+### AVALIAÇÃO
 
-## Integrate with your tools
+O projeto será availiado com uma nota de 0 a 10 (que será a nota Pr definida no Programa da Disciplina), dividida de acordo com as seguintes entregas:
 
-- [ ] [Set up project integrations](https://git.ufes.br/ricardo.silva.07/pfprog2-2022/-/settings/integrations)
+- **Entrega 1** : Descrição geral da DApp (Prazo: 22/dez) => **1 ponto**.
+- **Entrega 2** : Contrato deployed em uma rede de teste + acesso http à DApp + Códigos implementados (Prazo: 30/jan.) =>  **8 pontos**.
+    - _Obs : Caso você tenha utilizado alguma ferramenta de Unit Test, você deverá gravar um pequeno vídeo (2-3 min) demonstrando a realização dos testes_
+- **Entrega 3** :  Apresentação (Prazo: 31/jan a 07/fev) => **1 ponto**.
+    - _Obs : Além do ponto de apresentação no projeto, cada estudante poderá receber turings dos colegas como resultado da apresentação. Os turings recebidos serão contabilizados posteriormente_.
 
-## Collaborate with your team
+## Domínio de Aplicação
 
-- [ ] [Invite team members and collaborators](https://docs.gitlab.com/ee/user/project/members/)
-- [ ] [Create a new merge request](https://docs.gitlab.com/ee/user/project/merge_requests/creating_merge_requests.html)
-- [ ] [Automatically close issues from merge requests](https://docs.gitlab.com/ee/user/project/issues/managing_issues.html#closing-issues-automatically)
-- [ ] [Enable merge request approvals](https://docs.gitlab.com/ee/user/project/merge_requests/approvals/)
-- [ ] [Automatically merge when pipeline succeeds](https://docs.gitlab.com/ee/user/project/merge_requests/merge_when_pipeline_succeeds.html)
+Criar uma Plataforma Jogo da Forca que permita a aos usuários donos criar uma instancia de jogo com uma palavra secreta e permite que outros jogadores tentem acertar essa palavra. Os donos não podem apostar nos próprios jogos. 
 
-## Test and Deploy
+Ao se criar um jogo o dono lança um premio de acordo com os tokens que tem. Se algum dos jogadores acertarem eles levam o prêmio, e o dono do jogo é premiado de acordo com o número de apostas que o seu jogo receber.
 
-Use the built-in continuous integration in GitLab.
+As apostas não podem ser repetidas em um jogo. Se nenhum jogador acertar a palavra após certo tempo (ou número de blocos na blockchain) o jogo perde a validade, e os jogadores podem receber seus tokens de volta e o dono do jogo só pode reaver o prêmio para si desde que consiga provar que nenhum usuário acertou a palavra.
 
-- [ ] [Get started with GitLab CI/CD](https://docs.gitlab.com/ee/ci/quick_start/index.html)
-- [ ] [Analyze your code for known vulnerabilities with Static Application Security Testing(SAST)](https://docs.gitlab.com/ee/user/application_security/sast/)
-- [ ] [Deploy to Kubernetes, Amazon EC2, or Amazon ECS using Auto Deploy](https://docs.gitlab.com/ee/topics/autodevops/requirements.html)
-- [ ] [Use pull-based deployments for improved Kubernetes management](https://docs.gitlab.com/ee/user/clusters/agent/)
-- [ ] [Set up protected environments](https://docs.gitlab.com/ee/ci/environments/protected_environments.html)
+Esse sistema se assenta sobre as seguintes premissas:  a palavra ser enviada secretamente no início do jogo, não pode ser adivinha pelos jogadores utilizando força-bruta ao longo de um jogo, nem pode ser trocada pelo dono após o inicio de um jogo. Uma das formas de atingir esses objetivos seria com transações privadas.
 
-***
+## Instalação
 
-# Editing this README
+Em desenvolvimento ...
 
-When you're ready to make this README your own, just edit this file and use the handy template below (or feel free to structure it however you want - this is just a starting point!). Thank you to [makeareadme.com](https://www.makeareadme.com/) for this template.
+## Uso
 
-## Suggestions for a good README
-Every project is different, so consider which of these sections apply to yours. The sections used in the template are suggestions for most open source projects. Also keep in mind that while a README can be too long and detailed, too long is better than too short. If you think your README is too long, consider utilizing another form of documentation rather than cutting out information.
+Em desenvolvimento ...
 
-## Name
-Choose a self-explaining name for your project.
+## Suporte
 
-## Description
-Let people know what your project can do specifically. Provide context and add a link to any reference visitors might be unfamiliar with. A list of Features or a Background subsection can also be added here. If there are alternatives to your project, this is a good place to list differentiating factors.
+Mande um e-mail para ric1500ric@gmail.com
 
-## Badges
-On some READMEs, you may see small images that convey metadata, such as whether or not all the tests are passing for the project. You can use Shields to add some to your README. Many services also have instructions for adding a badge.
+## Licença
 
-## Visuals
-Depending on what you are making, it can be a good idea to include screenshots or even a video (you'll frequently see GIFs rather than actual videos). Tools like ttygif can help, but check out Asciinema for a more sophisticated method.
-
-## Installation
-Within a particular ecosystem, there may be a common way of installing things, such as using Yarn, NuGet, or Homebrew. However, consider the possibility that whoever is reading your README is a novice and would like more guidance. Listing specific steps helps remove ambiguity and gets people to using your project as quickly as possible. If it only runs in a specific context like a particular programming language version or operating system or has dependencies that have to be installed manually, also add a Requirements subsection.
-
-## Usage
-Use examples liberally, and show the expected output if you can. It's helpful to have inline the smallest example of usage that you can demonstrate, while providing links to more sophisticated examples if they are too long to reasonably include in the README.
-
-## Support
-Tell people where they can go to for help. It can be any combination of an issue tracker, a chat room, an email address, etc.
-
-## Roadmap
-If you have ideas for releases in the future, it is a good idea to list them in the README.
-
-## Contributing
-State if you are open to contributions and what your requirements are for accepting them.
-
-For people who want to make changes to your project, it's helpful to have some documentation on how to get started. Perhaps there is a script that they should run or some environment variables that they need to set. Make these steps explicit. These instructions could also be useful to your future self.
-
-You can also document commands to lint the code or run tests. These steps help to ensure high code quality and reduce the likelihood that the changes inadvertently break something. Having instructions for running tests is especially helpful if it requires external setup, such as starting a Selenium server for testing in a browser.
-
-## Authors and acknowledgment
-Show your appreciation to those who have contributed to the project.
-
-## License
-For open source projects, say how it is licensed.
-
-## Project status
-If you have run out of energy or time for your project, put a note at the top of the README saying that development has slowed down or stopped completely. Someone may choose to fork your project or volunteer to step in as a maintainer or owner, allowing your project to keep going. You can also make an explicit request for maintainers.
+All other files are covered by the GNU license, see [`LICENSE`](./LICENSE).
