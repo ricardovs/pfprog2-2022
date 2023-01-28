@@ -90,14 +90,18 @@ function AES_Done() {
    that the array 'key' is modified.
 */
 
-function AES_ExpandKey(key) {
-  var kl = key.length, ks, Rcon = 1;
+function AES_ExpandKey(shortkey) {
+  var kl = shortkey.length, ks, Rcon = 1;
   switch (kl) {
     case 16: ks = 16 * (10 + 1); break;
     case 24: ks = 16 * (12 + 1); break;
     case 32: ks = 16 * (14 + 1); break;
     default: 
       alert("AES_ExpandKey: Only key lengths of 16, 24 or 32 bytes allowed!");
+  }
+  key = new Uint8Array(ks);
+  for(let i = 0; i < kl; i++){
+    key[i] = shortkey[i];
   }
   for(var i = kl; i < ks; i += 4) {
     var temp = key.slice(i - 4, i);
@@ -113,12 +117,20 @@ function AES_ExpandKey(key) {
     for(var j = 0; j < 4; j++)
       key[i + j] = key[i + j - kl] ^ temp[j];
   }
+  return key;
 }
 
 /* 
    AES_Encrypt: encrypt the 16 byte array 'block' with the previously 
    expanded key 'key'.
 */
+function hexPrint(block){
+  var out = ""
+  block.forEach(e => {
+    out += " 0x"+e.toString(16);
+  });
+  return out
+}
 
 function AES_Encrypt(block, key) {
   var l = key.length;
@@ -131,7 +143,7 @@ function AES_Encrypt(block, key) {
   }
   AES_SubBytes(block, AES_Sbox);
   AES_ShiftRows(block, AES_ShiftRowTab);
-  AES_AddRoundKey(block, key.slice(i, l));
+  AES_AddRoundKey(block, key.slice(l-16, l));
 }
 
 /* 
@@ -159,7 +171,7 @@ function AES_Decrypt(block, key) {
 
 function AES_SubBytes(state, sbox) {
   for(var i = 0; i < 16; i++)
-    state[i] = sbox[state[i]];  
+    state[i] = sbox[state[i]];
 }
 
 function AES_AddRoundKey(state, rkey) {
@@ -168,7 +180,7 @@ function AES_AddRoundKey(state, rkey) {
 }
 
 function AES_ShiftRows(state, shifttab) {
-  var h = new Array().concat(state);
+  var h = new Uint8Array(state);
   for(var i = 0; i < 16; i++)
     state[i] = h[shifttab[i]];
 }
