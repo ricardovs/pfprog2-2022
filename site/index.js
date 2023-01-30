@@ -9,6 +9,8 @@ const provider = GetProvier();
 
 // Creating variables for reusable dom elements
 const initialMessage = document.querySelector("#initial-message");
+const greetingMessage = document.querySelector("#greeting-message");
+const mainMenu = document.querySelector("#main-menu");
 const userAccountFooter = document.querySelector("#user-account-footer");
 const userAddressesSelector = document.querySelector("#user-account-address");
 
@@ -44,6 +46,7 @@ function ConnectingError(){
   msg_form.appendChild(h);
   msg_form.appendChild(br);
   msg_form.appendChild(p);
+  throw Error("Could not connect to your MetaMask Wallet.");
 }
 
 function GetProvier(){
@@ -56,33 +59,43 @@ function GetProvier(){
 }
   
 async function InitApplication(){
+  await LoadAccounts().catch(() =>{
+    ConnectingError();
+  });
+  DisplayGreetingMessage();
+}
+
+async function RequestUserAccounts(){
   if(useGoerli){
-    provider.send("eth_requestAccounts", []).then(() =>{
-      provider.listAccounts().then((accounts) => {
-        LoadAccounts(accounts);
-      });
-    }).catch(()=>{
-      ConnectingError();
-    });
-  }else{
-    provider.listAccounts().then((accounts) =>{
-      LoadAccounts(accounts);
-    }).catch(()=>{
-      ConnectingError();
-    });
+    await provider.send("eth_requestAccounts", []);
   }
 }
-  
-function LoadAccounts(accounts){
-  userAccounts = accounts;
-  accounts.forEach(c => {
+
+function DisplayGreetingMessage(){
+  initialMessage.style.display = "none";
+  greetingMessage.style.display = "block";
+  mainMenu.style.display = "none";
+  userAccountFooter.style.display = "none";
+}
+
+function DisplayMainMenu(){
+  initialMessage.style.display = "none";
+  greetingMessage.style.display = "none";
+  mainMenu.style.display = "block";
+  userAccountFooter.style.display = "block";
+}
+
+async function LoadAccounts(){
+  await RequestUserAccounts();
+  userAccounts = await provider.listAccounts().then((accounts) =>{
+    return accounts;
+  });
+  userAccounts.forEach(c => {
     var opt = document.createElement("option");
     opt.innerHTML = String(c);
     userAddressesSelector.appendChild(opt);
   });
   updatedSignerContract();
-  initialMessage.style.display = "none";
-  userAccountFooter.style.display = "block";
 }
 
 function GenerateNewKey(){
