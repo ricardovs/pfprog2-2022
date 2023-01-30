@@ -1,6 +1,7 @@
 let Contract;
 let signer;
 let userAccounts;
+let key;
 const ContractAddress = "";
 const ContractABI = [];
 const useGoerli = false; 
@@ -84,6 +85,35 @@ function LoadAccounts(accounts){
   userAccountFooter.style.display = "block";
 }
 
+function GenerateNewKey(){
+  key = self.crypto.getRandomValues(new Uint8Array(16));
+}
+
+function EncryptWord(word){
+  if(word.length >= 50){
+    throw RangeError("The word has more than 50 characters");
+  }
+  let block = new Uint8Array(64);
+  let i;
+  for(i = 0; i < word.length; i++){
+    block[63 - i] = word.charCodeAt(i);
+  }
+  block[63 - 1] = 0;
+  EncryptBlock(block, expandedKey);
+  return block;
+}
+
+function DecryptWord(key, block){
+  DecryptBlock(key, block);
+  word = "";
+  let i = 63;
+  while((i >= 0) && (block[i] != 0)){
+    word += String.fromCharCode(b[i]);
+    i--;
+  }
+  return word; 
+}
+
 function RunTest(){
   /*
   //Test Key Expansion
@@ -99,29 +129,48 @@ function RunTest(){
  ])
   let block = new Uint16Array([
     0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
-    0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff]);
+    0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff,
+    0x00, 0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77,
+    0x88, 0x99, 0xaa, 0xbb, 0xcc, 0xdd, 0xee, 0xff
+  ]);
+    console.log("Block: " + hexPrint(block));
+    console.log("Key: " + hexPrint(key));
     console.log("ENCRIPT");
-    EncriptBlock(key, block);
-    console.log(hexPrint(block));
+    EncryptBlock(key, block);
+    console.log("Block: " + hexPrint(block));
+    console.log("Key: " + hexPrint(key));
     console.log("DECRIPT");
-    DecriptBlock(key, block);
-    console.log(hexPrint(block)); 
+    DecryptBlock(key, block);
+    console.log("Block: " + hexPrint(block));
+    console.log("Key: " + hexPrint(key));
 }
 
-function DecriptBlock(key,block){
+function DecryptBlock(key,block){
   AES_Init();
-  key = AES_ExpandKey(key);
-  AES_Decrypt(block, key);
+  let expandedKey = AES_ExpandKey(key);
+  for(let i = 0; i < Math.floor(block.length/16); i++){
+    let b = block.slice(i*16, (i+1)*16);
+    AES_Decrypt(b, expandedKey);
+    for(let j = 0; j < 16; j++){
+      block[i*16 + j] = b[j];
+    }
+  }  
   AES_Done();
 }
 
-function EncriptBlock(key, block){
+function EncryptBlock(key, block){
   AES_Init();
-  key = AES_ExpandKey(key);
-  AES_Encrypt(block, key);
+  let expandedKey = AES_ExpandKey(key);
+  for(let i = 0; i < Math.floor(block.length/16); i++){
+    let b = block.slice(i*16, (i+1)*16);
+    AES_Encrypt(b, expandedKey);
+    for(let j = 0; j < 16; j++){
+      block[i*16 + j] = b[j];
+    }
+  } 
   AES_Done();
 }
 
-RunTest();
+//RunTest();
 
 InitApplication();
