@@ -1,0 +1,18 @@
+{
+  "name": "pfprog2-2022",
+  "version": "1.0.0",
+  "description": "Final Project",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://git.ufes.br/ricardo.silva.07/pfprog2-2022.git"
+  },
+  "author": "Ricardo Vieira da Silva",
+  "license": "ISC",
+  "devDependencies": {
+    "hardhat": "^2.12.6"
+  }
+}
