@@ -91,7 +91,7 @@ function GenerateNewKey(){
 
 function EncryptWord(word){
   if(word.length >= 50){
-    throw RangeError("The word has more than 50 characters");
+    throw new RangeError("The word has more than 50 characters");
   }
   let block = new Uint8Array(64);
   let i;
@@ -146,6 +146,9 @@ function RunTest(){
 }
 
 function DecryptBlock(key,block){
+  if(block.length%16 != 0){
+    throw new Error('AES only works with 16 bytes (128bits) blocks of info.');
+  }
   AES_Init();
   let expandedKey = AES_ExpandKey(key);
   for(let i = 0; i < Math.floor(block.length/16); i++){
@@ -159,6 +162,9 @@ function DecryptBlock(key,block){
 }
 
 function EncryptBlock(key, block){
+  if(block.length%16 != 0){
+    throw new Error('AES only works with 16 bytes (128bits) blocks of info.');
+  }
   AES_Init();
   let expandedKey = AES_ExpandKey(key);
   for(let i = 0; i < Math.floor(block.length/16); i++){
