@@ -1,20 +1,19 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.2;
 
-import "./WordAccess.sol";
-
 interface IWordOracle{
     function addProvider(address provider) external;
     function removeProvider(address provider) external;
     function setProvidersThreshold(uint threshold) external;
-    function requestValidateChallenge() external returns (uint256);
-    function returnValidateChallenge(bool validationResult, uint256 id) external;
+    function requestValidation() external returns (uint256);
+    function addProviderVote(uint256 requestId, bool validationResult, uint wordId) external;
 }
 
-contract WordOracle is IWordOracle, WordAccess {
+contract WordOracle {
 
-    uint private numProviders = 0;
-    uint private providersThreshold = 1;
+    uint public numProviders = 0;
+    mapping (address => bool) private _providersList; 
+    uint public providersThreshold = 1;
     uint private generatedId = 0;
 
     mapping(uint256=>bool) private pendingRequests;
@@ -26,110 +25,172 @@ contract WordOracle is IWordOracle, WordAccess {
         address providerAddress;
         address callerAddress;
         bool validationResult;
+        uint wordId;
+    }
+
+    struct ProvidersConsensus{
+        uint wordSelected;
+        bool isEstablished;
     }
 
     // Events
-    event ValidationRequested(address callerAddress, uint id);
-    event ValidationReturned(bool isChallengeValid, address returnerAddress, uint id);
+    event ValidationRequested(address callerAddress, uint requestId);
+    event ValidationReturned(uint requestId, address returnerAddress, bool isChallengeValid, uint wordId);
     event ProviderAdded(address providerAddress);
     event ProviderRemoved(address providerAddress);
     event ProvidersThresholdChanged(uint threshold);
 
     constructor() {
-        _grantRole(PROVIDER_ROLE, msg.sender);      // make deployer a provider
-        numProviders = 1;
+
     }
 
-    modifier requestValidateCheck(){
-        require(isLocalGame(), "INVALID_GAME");
-        require(numProviders > 0, "NO_PROVIDERS");
+    function _generateNewRequestId() internal returns(bool){
+        if(pendingRequests[generatedId] == false){
+            return true;
+        }
         generatedId = uint(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % 1000;
-        require(pendingRequests[generatedId] == false, "TRY_LATER");
-        _;
+        return pendingRequests[generatedId] == false;
     }
 
-    function requestValidateChallenge() external override requestValidateCheck() returns(uint256){ 
+    function _requestValidation(address returnAddress) internal virtual returns(uint256){ 
         pendingRequests[generatedId] = true;
-        pendingAddress[generatedId] = msg.sender;
+        pendingAddress[generatedId] = returnAddress;
 
-        emit ValidationRequested(msg.sender, generatedId);
+        emit ValidationRequested(returnAddress, generatedId);
         return generatedId;
     }
 
-    modifier returnValidateCheck(uint id){
-        require(isProvider(), "NOT_PROVIDER");
-        require(pendingRequests[id], "REQUEST_NOT_FOUND");
-        _;
+    function _isPendingRequest(uint requestId) internal view returns(bool){
+        return pendingRequests[requestId];
     }
 
-    function returnValidateChallenge(bool validationResult, uint256 id) external override returnValidateCheck(id){
+    function _endValidateChallenge(address callerAddress, bool validationResult, uint wordId, uint requestId) private {
+         // Clean up
+        delete pendingRequests[requestId];
+        delete pendingAddress[requestId];
+
+        emit ValidationReturned(requestId, callerAddress, validationResult, wordId);       
+
+        // Fulfill request
+        _fulfillRequest(validationResult, callerAddress, wordId);
+    }
+
+    function _addProviderVote(uint256 requestId, bool validationResult, uint wordId) internal virtual{
+        address provider = msg.sender;
+        address callerAddress = pendingAddress[requestId];
+    
         // Add newest vote to list
-        ProviderVote memory vote = ProviderVote(msg.sender, pendingAddress[id], validationResult);
-        providersVotes[id].push(vote);
+        ProviderVote memory vote = ProviderVote(provider, callerAddress, validationResult, wordId);
+        providersVotes[requestId].push(vote);
 
         // Check if we've received enough responses
-        if (providersVotes[id].length >= providersThreshold) {
-            uint approvedNumber = 0;
-            uint  receivedAwnsers = providersVotes[id].length;
+        if(providersThreshold > providersVotes[requestId].length){
+            return;
+        }
+        
+        ProviderVote[] memory votesReceived = providersVotes[requestId];
+        uint qntVotes = votesReceived.length;
+        uint qntApproved = 0;     
+        
+        // Loop through the array and combine responses
+        for (uint i=0; i < qntVotes; i++) {
+            if(votesReceived[i].validationResult == true){
+                qntApproved++;
+            }
+        }
+        
+        bool approvedResult = qntApproved > (qntVotes/2);
+        if(!approvedResult){
+            _endValidateChallenge(callerAddress, validationResult, 0, requestId);
+            return;
+        }
+        
+        ProvidersConsensus memory pullCosensus = _getWordConsensus(votesReceived);
 
-            // Loop through the array and combine responses
-            for (uint i=0; i < receivedAwnsers; i++) {
-                if(providersVotes[id][i].validationResult == true){
-                    approvedNumber++;
+        if(!pullCosensus.isEstablished){
+            return;
+        }
+        
+        _endValidateChallenge(callerAddress, approvedResult, pullCosensus.wordSelected, requestId);
+    }
+
+    function _getWordConsensus(ProviderVote[] memory votes) private pure returns(ProvidersConsensus memory consensus) {
+        uint[] memory wordIds;
+        uint[] memory wordIdFrequencies;
+        uint maxFrequency = 0;
+        uint maxFrequencyIndex = 0;
+
+        for(uint i = 0; i < votes.length; i++){
+            if(votes[i].validationResult != true){
+                continue;
+            }
+            bool foundWordId = false;
+            for (uint j = 0; j < wordIds.length; j++){
+                if(votes[i].wordId == wordIds[j]){
+                    foundWordId = true;
+                    wordIdFrequencies[j]++;
+                    if(wordIdFrequencies[j] > maxFrequency){
+                        maxFrequency = wordIdFrequencies[j];
+                        maxFrequencyIndex = j;
+                    }
+                    break;
                 }
             }
-          
-            bool responseValue = approvedNumber > (receivedAwnsers/2);
-            address callerAddress = pendingAddress[id];
-    
-            // Clean up
-            delete pendingRequests[id];
-            delete pendingAddress[id];
-
-            emit ValidationReturned(responseValue, callerAddress, id);
-            
-            // Fulfill request
-            _fulfillRequest(responseValue, callerAddress, id);
+            if(!foundWordId){
+                uint arraySize = wordIds.length;
+                wordIds[arraySize] = votes[i].wordId;
+                wordIdFrequencies[arraySize] = 1;
+                if(maxFrequency == 0){
+                    maxFrequency = 1;
+                    maxFrequencyIndex = arraySize;
+                }
+            }
         }
+
+        //No votes found
+        if(maxFrequency == 0){
+            consensus.isEstablished = false;
+            consensus.wordSelected = 0;
+            return consensus;
+        }
+
+        for(uint i = 0; i < wordIds.length; i++){
+            if(wordIdFrequencies[i] == maxFrequency){
+                if(i != maxFrequencyIndex){
+                    consensus.isEstablished = false;
+                    consensus.wordSelected = 0;
+                    return consensus;
+                }
+            }
+        }
+        consensus.isEstablished == true;
+        consensus.wordSelected = votes[maxFrequencyIndex].wordId;
+        return consensus;
     }
 
-    // Admin functions
-
-    modifier addProviderCheck(address provider){
-        require(isAdmin(), "NOT_ADMIN");
-        require(!hasRole(PROVIDER_ROLE, provider), "ALREADY_PROVIDER");
-        _;
-    }
-
-    function addProvider(address provider) external override addProviderCheck(provider){
-        _grantRole(PROVIDER_ROLE, provider);
-        numProviders++;  
+    function _addProvider(address provider) internal virtual {
+        require(_providersList[provider] == false, "ALREADY_PROVIDER");
+        _providersList[provider] = true;
+        numProviders++;
         emit ProviderAdded(provider);
     }
 
-    modifier removeProviderCheck(address provider){
-        require(isAdmin(), "NOT_ADMIN");
-        require(!hasRole(PROVIDER_ROLE, provider), "NOT_PROVIDER");
-        require (numProviders > 1, "Cannot remove the only provider.");
-        _;
-    }
-
-    function removeProvider(address provider) external override removeProviderCheck(provider) {
-        _revokeRole(PROVIDER_ROLE, provider);
+    function _removeProvider(address provider) internal virtual {
+        require(_providersList[provider], "NOT_PROVIDER");
+        require (numProviders > 1, "LAST_PROVIDER");
+        delete _providersList[provider];
         numProviders--;
         emit ProviderRemoved(provider);
     }
 
-    modifier setProvidersThresholdCheck(uint threshold){
-        require(isAdmin(), "NOT_ADMIN");
-        require(threshold > 0, "INVALID_THRESHOLD");
-        _;
+    function _isProvider(address provider) internal view returns(bool){
+        return _providersList[provider];
     }
 
-    function setProvidersThreshold(uint threshold) external override setProvidersThresholdCheck(threshold) { 
+    function _setProvidersThreshold(uint threshold) internal { 
         providersThreshold = threshold;
         emit ProvidersThresholdChanged(providersThreshold);
     }
-    function _fulfillRequest(bool responseValue, address game, uint request_id) internal virtual
-    {} 
+
+    function _fulfillRequest(bool responseValue, address game, uint wordId) internal virtual {} 
 }

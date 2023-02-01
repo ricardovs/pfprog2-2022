@@ -57,7 +57,6 @@ Esse sistema se assenta sobre as seguintes premissas:  a palavra ser enviada sec
 
 A DApp roda em um servidor Web, logo as seguintes bibliotecas serão necessárias:
 ```
-cd ./site
 npm install connect serve-static
 ```
 

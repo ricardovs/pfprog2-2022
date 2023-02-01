@@ -3,64 +3,30 @@
 
 pragma solidity ^0.8.0;
 
-import "./WordAccess.sol";
-
 interface IWordToken {
-
     function totalSupply() external view returns (uint256);
     function balanceOf(address account) external view returns (uint256);
     function transfer(address recipient, uint256 amount) external returns (bool);
-    function chargeGuess(address user) external returns(bool);
-    event Transfer(address indexed from, address indexed to, uint256 value);
 }
 
-contract WordToken is WordAccess, IWordToken{
+contract WordToken {
 
     uint8 public constant decimals = 18;
     mapping(address => uint256) private _balances;
     uint256 private _totalSupply;
 
-    uint256 public userGuessCost;
-    uint256 public userNewGameCost;
-    uint256 public userPremium;
-    uint256 public ownerPremium;
+    event Transfer(address indexed from, address indexed to, uint256 value);
 
     constructor() {
-        userGuessCost = 50;
-        userPremium = 50;
-        ownerPremium = 50;
-        ownerPremium = 100;
+
     }
     
-    function chargeGuess(address user) external override onlyRole(LOCAL_GAMES_ROLE) returns(bool){
-        _burn(user, userGuessCost);
-        return true;
-    }
-
-    function chargeNewGame(address user) internal virtual returns(bool){
-        _burn(user, ownerPremium);
-        return true;
-    }
-    function totalSupply() public view virtual override returns (uint256) {
+    function _getTotalSupply() internal view returns (uint256) {
         return _totalSupply;
     }
 
-    function balanceOf(address account) public view virtual override returns (uint256) {
+    function _getBalanceOf(address account) internal view returns (uint256) {
         return _balances[account];
-    }
-
-    modifier transferCheck ( address to, uint256 amount){
-        address from = msg.sender; 
-        require(from != address(0), "ERROR_ZERO_ADDRESS_FROM");
-        require(to != address(0), "ERROR_ZERO_ADDRESS_TO");
-        require(_balances[from] >= amount, "ERROR_AMOUNT_EXCEEDS_BALANCE");
-        _;
-    }
-
-    function transfer(address to, uint256 amount) public virtual override transferCheck(to, amount) returns (bool) {
-        address owner = msg.sender;
-        _transfer(owner, to, amount);
-        return true;
     }
 
     function _transfer(address from, address to, uint256 amount) internal virtual {
