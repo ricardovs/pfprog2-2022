@@ -1,20 +1,23 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.2;
 
+import "./WordOracleAccess.sol";
+import "./WordGameFactory.sol";
+
 interface IWordOracle{
     function addProvider(address provider) external;
     function removeProvider(address provider) external;
     function setProvidersThreshold(uint threshold) external;
-    function requestValidation() external returns (uint256);
+    function addOracleCaller(address caller) external;
+    function removeOracleCaller(address caller) external;
+    function requestValidation(uint256 requestId) external returns (bool);
     function addProviderVote(uint256 requestId, bool validationResult, uint wordId) external;
 }
 
-contract WordOracle {
+contract WordOracle is IWordOracle, WordOracleAccess {
 
     uint public numProviders = 0;
-    mapping (address => bool) private _providersList; 
     uint public providersThreshold = 1;
-    uint private generatedId = 0;
 
     mapping(uint256=>bool) private pendingRequests;
     mapping(uint256=>address) private pendingAddress;
@@ -44,24 +47,85 @@ contract WordOracle {
 
     }
 
-    function _generateNewRequestId() internal returns(bool){
-        if(pendingRequests[generatedId] == false){
-            return true;
+    modifier addProviderCheck(address account){
+        require(_isAdmin(msg.sender), "NOT_ADMIN");
+        require(!_isProvider(account), "ALREADY_PROVIDER");
+        _;
+    }
+
+    function addProvider(address account) external override addProviderCheck(account){
+         _grantProvider(account);
+        numProviders++;
+        emit ProviderAdded(account);
+    }
+
+    modifier removeProviderCheck(address account){
+        require(_isAdmin(msg.sender), "NOT_ADMIN");
+        require(!_isProvider(account), "NOT_PROVIDER");
+        require (numProviders > 1, "LAST_PROVIDER");
+        _;
+    }
+
+    function removeProvider(address account) external override removeProviderCheck(account) {      
+        _revokeRole(PROVIDER_ROLE, account);
+        numProviders--;
+        emit ProviderRemoved(account);
+    }
+
+    modifier setProvidersThresholdCheck(uint threshold){
+        require(_isAdmin(msg.sender), "NOT_ADMIN");
+        require(threshold > 0, "INVALID_THRESHOLD");
+        _;
+    }
+
+    function setProvidersThreshold(uint threshold) external override setProvidersThresholdCheck(threshold) { 
+        providersThreshold = threshold;
+        emit ProvidersThresholdChanged(providersThreshold);
+    }
+
+    modifier addProviderVoteCheck(uint id){
+        require(_isProvider(msg.sender), "NOT_PROVIDER");
+        require(pendingRequests[id], "REQUEST_NOT_FOUND");
+        _;
+    }
+
+    modifier requestValidationCheck(address caller){
+        require(_callerApprove(caller), "INVALID_CALLER");
+        _;
+    }
+
+    modifier removeOracleCallerCheck(address account){
+        if(!_isAdmin(msg.sender)){
+            require(_isCallerAdm(msg.sender), "NOT_ADMIN");
         }
-        generatedId = uint(keccak256(abi.encodePacked(block.timestamp, msg.sender))) % 1000;
-        return pendingRequests[generatedId] == false;
+        require(_isCaller(account), "NOT_CALLER");
+        _;
     }
 
-    function _requestValidation(address returnAddress) internal virtual returns(uint256){ 
-        pendingRequests[generatedId] = true;
-        pendingAddress[generatedId] = returnAddress;
-
-        emit ValidationRequested(returnAddress, generatedId);
-        return generatedId;
+    function removeOracleCaller(address account) external removeOracleCallerCheck(account){
+        _revokeRole(CALLER_ROLE, account);
     }
 
-    function _isPendingRequest(uint requestId) internal view returns(bool){
-        return pendingRequests[requestId];
+    modifier addOracleCallerCheck(address account){
+        if(!_isAdmin(msg.sender)){
+            require(_isCallerAdm(msg.sender), "NOT_ADMIN");
+        }
+        require(!_isCaller(account), "ALREADY_CALLER");
+        _;
+    }
+
+    function addOracleCaller(address account) external addOracleCallerCheck(account){
+        _grantCaller(account);
+    }
+
+    function requestValidation(uint256 requestId) external override requestValidationCheck(msg.sender) returns(bool){
+        if(pendingRequests[requestId]){
+            return false;
+        }
+        pendingRequests[requestId] = true;
+        pendingAddress[requestId] = msg.sender;
+        emit ValidationRequested(msg.sender, requestId);
+        return true;
     }
 
     function _endValidateChallenge(address callerAddress, bool validationResult, uint wordId, uint requestId) private {
@@ -72,10 +136,10 @@ contract WordOracle {
         emit ValidationReturned(requestId, callerAddress, validationResult, wordId);       
 
         // Fulfill request
-        _fulfillRequest(validationResult, callerAddress, wordId);
+        IWordGameFactory(callerAddress).fulfillRequest(requestId, wordId, validationResult);
     }
 
-    function _addProviderVote(uint256 requestId, bool validationResult, uint wordId) internal virtual{
+    function addProviderVote(uint256 requestId, bool validationResult, uint wordId) external override addProviderVoteCheck(requestId){
         address provider = msg.sender;
         address callerAddress = pendingAddress[requestId];
     
@@ -167,30 +231,4 @@ contract WordOracle {
         consensus.wordSelected = votes[maxFrequencyIndex].wordId;
         return consensus;
     }
-
-    function _addProvider(address provider) internal virtual {
-        require(_providersList[provider] == false, "ALREADY_PROVIDER");
-        _providersList[provider] = true;
-        numProviders++;
-        emit ProviderAdded(provider);
-    }
-
-    function _removeProvider(address provider) internal virtual {
-        require(_providersList[provider], "NOT_PROVIDER");
-        require (numProviders > 1, "LAST_PROVIDER");
-        delete _providersList[provider];
-        numProviders--;
-        emit ProviderRemoved(provider);
-    }
-
-    function _isProvider(address provider) internal view returns(bool){
-        return _providersList[provider];
-    }
-
-    function _setProvidersThreshold(uint threshold) internal { 
-        providersThreshold = threshold;
-        emit ProvidersThresholdChanged(providersThreshold);
-    }
-
-    function _fulfillRequest(bool responseValue, address game, uint wordId) internal virtual {} 
 }

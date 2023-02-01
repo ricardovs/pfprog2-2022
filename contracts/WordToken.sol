@@ -9,7 +9,7 @@ interface IWordToken {
     function transfer(address recipient, uint256 amount) external returns (bool);
 }
 
-contract WordToken {
+contract WordToken is IWordToken{
 
     uint8 public constant decimals = 18;
     mapping(address => uint256) private _balances;
@@ -21,22 +21,31 @@ contract WordToken {
 
     }
     
-    function _getTotalSupply() internal view returns (uint256) {
+    function totalSupply() external view returns (uint256) {
         return _totalSupply;
     }
 
-    function _getBalanceOf(address account) internal view returns (uint256) {
+    function balanceOf(address account) public override view returns (uint256) {
         return _balances[account];
     }
 
+    modifier transferCheck(address from, address to, uint256 amount){
+        require(from != address(0), "ZERO_ADDRESS_FROM");
+        require(to != address(0), "ZERO_ADDRESS_TO");
+        require( _balances[from] >= amount, "AMOUNT_EXEEDS_BALANCE");
+        _;
+    }
+
+    function transfer(address to, uint256 amount) external transferCheck(msg.sender, to, amount) returns (bool){
+        _transfer(msg.sender, to, amount);
+        return true;
+    }
+
     function _transfer(address from, address to, uint256 amount) internal virtual {
-        require(from != address(0), "ERROR_ZERO_ADDRESS_FROM");
-        require(to != address(0), "ERROR_ZERO_ADDRESS_TO");
 
         _beforeTokenTransfer(from, to, amount);
 
         uint256 fromBalance = _balances[from];
-        require(fromBalance >= amount, "ERROR: transfer amount exceeds balance");
         unchecked {
             _balances[from] = fromBalance - amount;
             // Overflow not possible: the sum of all balances is capped by totalSupply, and the sum is preserved by
