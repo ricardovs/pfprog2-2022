@@ -13,7 +13,7 @@ display: flex;
 justify-content: center;
 flex-direction: column;
 min-height: 100vh;
-max-width: 500px;
+max-width: 600px;
 margin:  0 auto;
 padding: 0 20px;
 }
@@ -22,7 +22,7 @@ padding: 0 20px;
 {
 font-size: 1.5rem;
 font-weight: bold;
-margin-bottom: 1rem;
+margin-bottom: 5px;
 background-color: #333333;
 color: #ffffff;
 padding: 0.5rem 1rem;
@@ -160,6 +160,7 @@ background-color: #003366;
 }
 
 #greeting-message,
+#game-display-menu,
 #main-menu,
 #user-account-footer
 {
@@ -230,6 +231,64 @@ font-size: 2.5em;
 {
 font-size: 1.5em;
 margin-bottom: 1.1em;
+}
+
+#game-display
+{
+color:blue;
+}
+
+.game-display-body{
+    width: 200px;
+}
+
+.game-selection-body{
+    color:black;
+    max-width: 200px;
+}
+
+.game-display-section{
+    display: flex;
+}
+
+.guess-body{
+    margin-left: 5px;
+    width: 350px;
+}
+
+select.guess-list,
+select.game-list{
+    width: 100%;
+    overflow: auto;
+}
+
+.game-list option{
+    overflow-x:hidden;
+}
+
+.guess-list option,
+.game-list option
+{
+    border: 2px solid black;
+    border-radius: 5px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    font-size: 1.3em;
+    padding: 2px;
+}
+
+.guess-made-list{
+    width: 100%;
+    border: none;
+    overflow: auto;
+    height: 120px;
+}
+
+.change-game-button{
+    background-color: #003;
+}
+
+#make-guess-button{
+    background-color: #050;
 }
 
 .styled-table

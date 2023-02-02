@@ -25,6 +25,7 @@ window.greetingMessage = document.querySelector("#greeting-message");
 window.mainMenu = document.querySelector("#main-menu");
 window.userAccountFooter = document.querySelector("#user-account-footer");
 window.userAddressesSelector = document.querySelector("#user-account-address");
+window.gameDisplayMenu = document.querySelector("#game-display-menu");
 
 window.updateContracts = (() => {
   window.Oracle = new ethers.Contract(
@@ -105,6 +106,7 @@ function DisplayGreetingMessage(){
   window.greetingMessage.style.display = "block";
   window.mainMenu.style.display = "none";
   window.userAccountFooter.style.display = "none";
+  window.gameDisplayMenu.style.display = "none";
 }
 
 function DisplayMainMenu(){
@@ -112,6 +114,15 @@ function DisplayMainMenu(){
   window.greetingMessage.style.display = "none";
   window.mainMenu.style.display = "block";
   window.userAccountFooter.style.display = "block";
+  window.gameDisplayMenu.style.display = "none";
+}
+
+function DisplayGameMenu(){
+  window.initialMessage.style.display = "none";
+  window.greetingMessage.style.display = "none";
+  window.mainMenu.style.display = "none";
+  window.userAccountFooter.style.display = "block";
+  window.gameDisplayMenu.style.display = "block";
 }
 
 async function LoadAccounts(){

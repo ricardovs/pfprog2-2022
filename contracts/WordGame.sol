@@ -77,6 +77,7 @@ contract WordGame is IWordGame {
         require(wordId <= LAST_WORD_ID, "INVALID_WORD_ID");
         require(wordId > 0, "INVALID_WORD_ID");
         require(!hasUserGuessedWord(msg.sender, wordId), "ALREADY_GUESSED");
+        require(_tips[wordId], "OWNER_NOT_SUBMITED");
         _;
     }
 
