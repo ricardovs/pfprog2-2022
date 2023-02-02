@@ -45,11 +45,10 @@ O projeto será availiado com uma nota de 0 a 10 (que será a nota Pr definida n
 
 ## Domínio de Aplicação
 
-Criar uma Plataforma Jogo da Forca que permita a aos usuários donos criar uma instancia de jogo com uma palavra secreta e permite que outros jogadores tentem acertar essa palavra. Os donos não podem apostar nos próprios jogos. 
+Trata-se de um jogo de adivinhar palavras, no qual um jogador Desafiante, libera uma lista de palavras para que os outros adivinhem qual palavra foi escolhida por ele.
+Caso os jogadores desafiados acertem a palavra escolhida pelo desafiante, eles levam o premio. Do contrario, caso ninguém escolha a palavra correta, o desafiante leva tudo. A plataforma permite que o desafiante seja dono de um Jogo associado a uma palavra secreta. Durante o jogo, o dono deve publicar uma sequencia de palavras, que deve incluir a palavra secreta (caso o dono do jogo não libere a palavra secreta ele perde direito ao prêmio). 
 
-Ao se criar um jogo o dono lança um premio de acordo com os tokens que tem. Se algum dos jogadores acertarem eles levam o prêmio, e o dono do jogo é premiado de acordo com o número de apostas que o seu jogo receber.
-
-As apostas não podem ser repetidas em um jogo. Se nenhum jogador acertar a palavra após certo tempo (ou número de blocos na blockchain) o jogo perde a validade, e os jogadores podem receber seus tokens de volta e o dono do jogo só pode reaver o prêmio para si desde que consiga provar que nenhum usuário acertou a palavra.
+Ao criar um jogo, o dono dele gasta tokens que são incluido ao premio final. Cada aposta também gasta tokens que se adicionam ao jogo. Caso mais de uma pessoa escolher corretamente a palavra secreta, o premio passa a ser dividido entre elas. Não há limite para o número de palavras que o dono do jogo pode liberar, porém cada nova pista (correta ou não) tem um custo para o dono do jogo. O jogo só acaba à pedido do dono peça, ou após certo tempo no qual nenhuma ação seja feita (isto é, caso ninguém aposte numa palavra e nem o dono do jogo libere uma dica).
 
 Esse sistema se assenta sobre as seguintes premissas:  a palavra ser enviada secretamente no início do jogo, não pode ser adivinha pelos jogadores utilizando força-bruta ao longo de um jogo, nem pode ser trocada pelo dono após o inicio de um jogo. Uma das formas de atingir esses objetivos seria com transações privadas.
 
