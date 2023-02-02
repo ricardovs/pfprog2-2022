@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.0;
 
-import "./WordGameFactory.sol";
+import "./WordFactory.sol";
 import "./WordOracle.sol";
 
 interface IWordGame{
@@ -45,6 +45,9 @@ contract WordGame is IWordGame {
 
     event OwnerTip(uint wordId);
     event UserGuess(uint wordId, address user);
+    event UsersWonGame(uint wordId);
+    event OwnerWonGame(uint wordId);
+    event InvalidGame();
     event ClosedGame();
 
     // Payable constructor can receive Ether
@@ -87,7 +90,7 @@ contract WordGame is IWordGame {
         _;
     }
 
-    function newTip(uint wordId) external newTipCheck(wordId) {
+    function newTip(uint wordId) external override newTipCheck(wordId) {
         _tips[wordId] = true;
         lastBlockAlive = block.number;
         emit OwnerTip(wordId);
@@ -108,12 +111,14 @@ contract WordGame is IWordGame {
         _;
     }
 
-    function setWinningWord(uint wordId) external setWinnerCheck(){
+    function setWinningWord(uint wordId) external override setWinnerCheck(){
         winningWord = wordId;
         if(wordId == 0){
              _status = GameStatus.OWNER_WON;
+             emit UsersWonGame(wordId);
         }else{
             _status = GameStatus.USER_WON;
+            emit OwnerWonGame(wordId);
         }
     }
 
@@ -125,10 +130,12 @@ contract WordGame is IWordGame {
 
     function closedGame() external closeGameCheck(){
         _status = GameStatus.CLOSE;
+        emit ClosedGame();
     }
 
-    function invalidateGame() external onlyFactory(){
+    function invalidateGame() external override onlyFactory(){
         _status = GameStatus.INVALID;
+        emit InvalidGame();
     }
 
     modifier reclaimCheck(){
@@ -145,7 +152,7 @@ contract WordGame is IWordGame {
         }
     }
 
-    function reclaimChallenge(uint8[64] memory _key, uint256 requestId) external reclaimCheck(){
+    function reclaimChallenge(uint8[64] memory _key, uint256 requestId) external override reclaimCheck(){
         _setKey(_key);
         IWordGameFactory(factory).requestValidation(requestId);
         _status = GameStatus.PENDIND;

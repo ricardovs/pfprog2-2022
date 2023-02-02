@@ -2,7 +2,7 @@
 pragma solidity ^0.8.2;
 
 import "./WordOracleAccess.sol";
-import "./WordGameFactory.sol";
+import "./WordFactory.sol";
 
 interface IWordOracle{
     function addProvider(address provider) external;
@@ -102,7 +102,7 @@ contract WordOracle is IWordOracle, WordOracleAccess {
         _;
     }
 
-    function removeOracleCaller(address account) external removeOracleCallerCheck(account){
+    function removeOracleCaller(address account) external override removeOracleCallerCheck(account){
         _revokeRole(CALLER_ROLE, account);
     }
 
@@ -114,7 +114,7 @@ contract WordOracle is IWordOracle, WordOracleAccess {
         _;
     }
 
-    function addOracleCaller(address account) external addOracleCallerCheck(account){
+    function addOracleCaller(address account) external override addOracleCallerCheck(account){
         _grantCaller(account);
     }
 
@@ -152,9 +152,14 @@ contract WordOracle is IWordOracle, WordOracleAccess {
             return;
         }
         
+        if((providersThreshold == 1)&&(numProviders == 1)){
+            //No concensus needed
+            _endValidateChallenge(callerAddress, validationResult, wordId, requestId);
+        }
+
         ProviderVote[] memory votesReceived = providersVotes[requestId];
         uint qntVotes = votesReceived.length;
-        uint qntApproved = 0;     
+        uint qntApproved = 0;
         
         // Loop through the array and combine responses
         for (uint i=0; i < qntVotes; i++) {

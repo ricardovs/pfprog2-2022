@@ -58,6 +58,17 @@ Esse sistema se assenta sobre as seguintes premissas:  a palavra ser enviada sec
 A DApp roda em um servidor Web, logo as seguintes bibliotecas serão necessárias:
 ```
 npm install connect serve-static
+npm install --save-dev cha
+```
+
+Para compilar o código fazemos:
+```
+npx hardhat compile
+```
+
+Para rodar os testes:
+```
+npx hardhat test
 ```
 
 ## Uso

@@ -5,6 +5,9 @@ pragma solidity ^0.8.0;
 
 interface IWordToken {
     function totalSupply() external view returns (uint256);
+    function mint(address account, uint256 amount) external;
+    function burn(address account, uint256 amount) external;
+    function setFactory(address newFactory) external;
     function balanceOf(address account) external view returns (uint256);
     function transfer(address recipient, uint256 amount) external returns (bool);
 }
@@ -14,14 +17,45 @@ contract WordToken is IWordToken{
     uint8 public constant decimals = 18;
     mapping(address => uint256) private _balances;
     uint256 private _totalSupply;
+    address public owner;
+    address public factory;
 
     event Transfer(address indexed from, address indexed to, uint256 value);
 
     constructor() {
-
+        owner = msg.sender;
     }
     
-    function totalSupply() external view returns (uint256) {
+    modifier mintChecker(address account){
+        require(factory != address(0), "NO_FACTORY");
+        require(factory == msg.sender, "ONLY_FACTORY");
+        require(account != address(0), "INVALID_ADDRESS");
+        _;
+    }
+
+    modifier burnChecker(address account, uint256 amount){
+        require(factory != address(0), "NO_FACTORY");
+        require(factory == msg.sender, "ONLY_FACTORY");
+        require(account != address(0), "INVALID_ADDRESS");
+        require( _balances[account] >= amount, "LACKS_BALANCE");
+        _;
+    }
+
+    function mint(address account, uint256 amount) external override mintChecker(account){
+        _mint(account, amount);
+    }
+    function burn(address account, uint256 amount) external override burnChecker(account, amount){
+        _burn(account, amount);
+    }
+    modifier onlyOwner(){
+        require(msg.sender == owner, "NOT_OWNER");
+        _;
+    }
+    function setFactory(address newFactory) external override onlyOwner(){
+        factory = newFactory;
+    }
+
+    function totalSupply() external view override returns (uint256) {
         return _totalSupply;
     }
 
@@ -36,7 +70,7 @@ contract WordToken is IWordToken{
         _;
     }
 
-    function transfer(address to, uint256 amount) external transferCheck(msg.sender, to, amount) returns (bool){
+    function transfer(address to, uint256 amount) external override transferCheck(msg.sender, to, amount) returns (bool){
         _transfer(msg.sender, to, amount);
         return true;
     }

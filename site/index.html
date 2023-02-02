@@ -34,7 +34,7 @@
         </div>
       </div>
       <div class="greeting-footer">
-        <input type="button" onclick="DisplayMainMenu();" class="blue-background"  value="Go to Menu" />
+        <input type="button"  class="display-main-menu blue-background"  value="Go to Menu" />
       </div>
     </div>
     <!-- Main Menu -->
@@ -44,11 +44,11 @@
       </div>
       <div class="section-body">
         <form class="main-menu-form">
-          <input type="button" class="green-background"  value="Play GuessWord" />
+          <input type="button" class="green-background display-game-list"  value="Play GuessWord" />
           <input type="button" class="dark-blue-background" value="Create GuessWord" />
           <input type="button" class="yellow-background" value="Load GameFactory" />
           <input type="button" class="red-background" value="Create GameFactory" />
-          <input type="button" onclick="DisplayGreetingMessage();" class="blue-background" value="GuessWord Info" />
+          <input type="button" class="blue-background" value="GuessWord Info" />
         </form>
       </div>
     </div>
@@ -57,7 +57,7 @@
       <div class="user-account-message section-header">
         <h3> User Address</h3>
       </div>
-      <select name="user-account-address" id="user-account-address" onchange="updatedSignerContract();" ></select>
+      <select name="user-account-address" id="user-account-address" onchange="window.updatedSignerContract();" ></select>
     </div>
     <!-- Importing Ethers.js script -->
     <script
@@ -65,8 +65,10 @@
       type="application/javascript"
     ></script>
     <!-- Importing our AES javascript library -->
-    <script src="./jsaes.js"></script>
+    <script type="module" src="./scripts/jsaes.js"></script>
+    <!-- Importing ABIs file -->
+    <script type="module" src="./scripts/contractsABI.js"></script>
     <!-- Importing our javascript file -->
-    <script src="./index.js"></script>
+    <script type="module" src="./scripts/index.js"></script>
   </body>
 </html>

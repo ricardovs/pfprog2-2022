@@ -2,9 +2,9 @@
   "name": "pfprog2-2022",
   "version": "1.0.0",
   "description": "Final Project",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "mocha ./test/*"
   },
   "repository": {
     "type": "git",
@@ -13,7 +13,9 @@
   "author": "Ricardo Vieira da Silva",
   "license": "ISC",
   "devDependencies": {
-    "hardhat": "^2.12.6"
+    "chai": "^4.3.7",
+    "hardhat": "^2.12.6",
+    "mocha": "^10.2.0"
   },
   "dependencies": {
     "@openzeppelin/contracts": "^4.8.1"

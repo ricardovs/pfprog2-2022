@@ -37,6 +37,11 @@
    AES_Init: initialize the tables needed at runtime. Call this function
    before the (first) key expansion.
 */
+let AES_Sbox = null;
+let AES_ShiftRowTab = null;
+let AES_Sbox_Inv = null;
+let AES_ShiftRowTab_Inv = null;
+let AES_xtime = null;
 
 function AES_Init() {
   AES_Sbox = new Array(99,124,119,123,242,107,111,197,48,1,103,43,254,215,171,
@@ -76,11 +81,11 @@ function AES_Init() {
 */
 
 function AES_Done() {
-  delete AES_Sbox;
-  delete AES_ShiftRowTab;
-  delete AES_Sbox_Inv;
-  delete AES_ShiftRowTab_Inv;
-  delete AES_xtime;
+  AES_Sbox = null;
+  AES_ShiftRowTab = null;
+  AES_Sbox_Inv = null;
+  AES_ShiftRowTab_Inv = null;
+  AES_xtime = null;
 }
 
 /*
@@ -99,7 +104,7 @@ function AES_ExpandKey(shortkey) {
     default: 
       alert("AES_ExpandKey: Only key lengths of 16, 24 or 32 bytes allowed!");
   }
-  key = new Uint8Array(ks);
+  let key = new Uint8Array(ks);
   for(let i = 0; i < kl; i++){
     key[i] = shortkey[i];
   }
@@ -211,3 +216,6 @@ function AES_MixColumns_Inv(state) {
     state[i + 3] ^= h2 ^ AES_xtime[s3 ^ s0];
   }
 }
+
+export {AES_Init, AES_ExpandKey, AES_Encrypt, AES_Decrypt, AES_Done};
+export {hexPrint};

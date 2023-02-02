@@ -1,27 +1,54 @@
-let Contract;
-let signer;
-let userAccounts;
-let key;
-const ContractAddress = "";
-const ContractABI = [];
-const useGoerli = false; 
-const provider = GetProvier();
+window.Oracle;
+window.Factory;
+window.Game;
+
+window.signer;
+window.userAccounts;
+window.key;
+
+window.oracleAddress = "0xd9145CCE52D386f254917e481eB44e9943F39138";
+window.factoryAddress = "";
+window.gameAddress = "";
+
+import { oracleABI, factoryABI, gameABI } from './contractsABI.js';
+
+import {AES_Init, AES_ExpandKey, AES_Encrypt, AES_Decrypt, AES_Done} from './jsaes.js';
+import {hexPrint} from './jsaes.js';
+
+
+window.useGanache = true; 
+window.provider = GetProvier();
 
 // Creating variables for reusable dom elements
-const initialMessage = document.querySelector("#initial-message");
-const greetingMessage = document.querySelector("#greeting-message");
-const mainMenu = document.querySelector("#main-menu");
-const userAccountFooter = document.querySelector("#user-account-footer");
-const userAddressesSelector = document.querySelector("#user-account-address");
+window.initialMessage = document.querySelector("#initial-message");
+window.greetingMessage = document.querySelector("#greeting-message");
+window.mainMenu = document.querySelector("#main-menu");
+window.userAccountFooter = document.querySelector("#user-account-footer");
+window.userAddressesSelector = document.querySelector("#user-account-address");
+
+window.updateContracts = (() => {
+  window.Oracle = new ethers.Contract(
+    window.oracleAddress,
+    oracleABI,
+    window.signer
+  );
+  window.Factory = new ethers.Contract(
+    window.factoryAddress,
+    factoryABI,
+    window.signer
+  );
+  window.Game = new ethers.Contract(
+    window.gameAddress,
+    gameABI,
+    window.signer
+  );
+});
 
 function updatedSignerContract(){
-  signer = provider.getSigner(userAccountFooter.selectedIndex);
-  Contract = new ethers.Contract(
-    ContractAddress,
-    ContractABI,
-    signer
-  );
+  window.signer = window.provider.getSigner(window.userAccountFooter.selectedIndex);
+  window.updateContracts();
 }
+
 
 function HandleContracError(response){
   response = String(response);
@@ -36,7 +63,7 @@ function RemoveAllChilds(element){
 }
 
 function ConnectingError(){
-  msg_form =  initialMessage.querySelector(".initial-message-form");
+  let msg_form =  window.initialMessage.querySelector(".initial-message-form");
   RemoveAllChilds(msg_form);
   var h = document.createElement("h1");
   h.innerHTML = ("Error :'(");
@@ -50,7 +77,7 @@ function ConnectingError(){
 }
 
 function GetProvier(){
-  if(useGoerli){
+  if(!window.useGanache){
     return ((window.ethereum != null) ? 
       new ethers.providers.Web3Provider(window.ethereum) : ethers.providers.getDefaultProvider());
   }
@@ -60,40 +87,42 @@ function GetProvier(){
   
 async function InitApplication(){
   await LoadAccounts().catch(() =>{
-    ConnectingError();
+    if(typeof window.userAccounts == 'undefined'){
+      ConnectingError();
+    }
   });
   DisplayGreetingMessage();
 }
 
 async function RequestUserAccounts(){
-  if(useGoerli){
-    await provider.send("eth_requestAccounts", []);
+  if(!window.useGanache){
+    await window.provider.send("eth_requestAccounts", []);
   }
 }
 
 function DisplayGreetingMessage(){
-  initialMessage.style.display = "none";
-  greetingMessage.style.display = "block";
-  mainMenu.style.display = "none";
-  userAccountFooter.style.display = "none";
+  window.initialMessage.style.display = "none";
+  window.greetingMessage.style.display = "block";
+  window.mainMenu.style.display = "none";
+  window.userAccountFooter.style.display = "none";
 }
 
 function DisplayMainMenu(){
-  initialMessage.style.display = "none";
-  greetingMessage.style.display = "none";
-  mainMenu.style.display = "block";
-  userAccountFooter.style.display = "block";
+  window.initialMessage.style.display = "none";
+  window.greetingMessage.style.display = "none";
+  window.mainMenu.style.display = "block";
+  window.userAccountFooter.style.display = "block";
 }
 
 async function LoadAccounts(){
   await RequestUserAccounts();
-  userAccounts = await provider.listAccounts().then((accounts) =>{
+  window.userAccounts = await window.provider.listAccounts().then((accounts) =>{
     return accounts;
   });
-  userAccounts.forEach(c => {
+  window.userAccounts.forEach(c => {
     var opt = document.createElement("option");
     opt.innerHTML = String(c);
-    userAddressesSelector.appendChild(opt);
+    window.userAddressesSelector.appendChild(opt);
   });
   updatedSignerContract();
 }
@@ -190,6 +219,12 @@ function EncryptBlock(key, block){
   AES_Done();
 }
 
-//RunTest();
+RunTest();
+
+document.querySelectorAll('.display-main-menu').forEach((btn)=>{
+  btn.addEventListener("click", DisplayMainMenu);
+  console.log(btn);
+});
 
 InitApplication();
+

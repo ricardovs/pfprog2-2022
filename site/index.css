@@ -76,6 +76,12 @@ display: block;
 margin-bottom: 5px;
 }
 
+div.scroll
+{
+overflow-x: hidden;
+overflow-y: auto;
+}
+
 input
 {
 width: 100%;

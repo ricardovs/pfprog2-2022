@@ -5,7 +5,7 @@ pragma solidity ^0.8.0;
 import "./WordGame.sol";
 import "./WordToken.sol";
 import "./WordOracle.sol";
-import "./WordGameFactoryAccess.sol";
+import "./WordFactoryAccess.sol";
 
 interface IWordGameFactory {
     function newGame(uint8[64] calldata secret) external payable returns(address);
@@ -17,20 +17,24 @@ interface IWordGameFactory {
     function requestValidation(uint256 requestId) external;
 }
 
-contract WordGameFactory is IWordGameFactory, WordToken, WordGameFactoryAccess{
+contract WordGameFactory is IWordGameFactory, WordGameFactoryAccess{
 
     // Payable address can receive Ether
     address payable public owner;
     address public oracle;
+    address public token;
     address[] private _games;
     uint256 public gamesCounter;
     uint256 public newGameCost = 100;
     mapping(uint256 => address) private _validationRequest;
 
+    event NewGame(address game, address owner);
+
     // Payable constructor can receive Ether
-    constructor(address _oracle) payable {
+    constructor(address _oracle, address _token) payable {
         owner = payable(msg.sender);
         oracle = _oracle;
+        token = _token;
         _grantOracle(oracle);
     }
 
@@ -40,38 +44,41 @@ contract WordGameFactory is IWordGameFactory, WordToken, WordGameFactoryAccess{
         _;
     }
 
-    function reward(address user, uint256 amount) external rewardCheck(user) {
-        _mint(user, amount);
+    function reward(address user, uint256 amount) external override rewardCheck(user) {
+        IWordToken(token).mint(user, amount);
     }
 
     modifier chargeCheck(address user, uint256 amount){
         require(_isGame(msg.sender), "NOT_AUTHORIZED");
         require(user != address(0), "INVALID_ADDRESS");
-        require(balanceOf(user) >= amount, "FEW_TOKENS");
+        require(IWordToken(token).balanceOf(user) >= amount, "FEW_TOKENS");
         _;
     }
 
-    function charge(address user, uint256 amount) external chargeCheck(user, amount) {
-        _burn(user, amount);
+    function charge(address user, uint256 amount) external override chargeCheck(user, amount) {
+        IWordToken(token).burn(user, amount);
     }
 
     function getTokens(uint256 amount) external override payable getTokensCheck(amount) returns (bool){        
         _beforePayble();
-        _mint(msg.sender, amount);    
+        IWordToken(token).mint(msg.sender, amount);    
         return true;
     }
 
-    function isChildGame(address account) external view returns(bool){
+    function isChildGame(address account) external override view returns(bool){
         return _isGame(account);
     }
 
     function newGame(uint8[64] calldata secret) public override payable returns(address){
         _beforePayble();
-        _burn(msg.sender, newGameCost);
-        WordGame game = new WordGame(msg.sender, secret, newGameCost);
-        IWordOracle(oracle).addOracleCaller(address(game));
-        _addNewGameAddress(address(game));
-        return  address(game);
+        address gameOwner = msg.sender;
+        IWordToken(token).burn(gameOwner, newGameCost);
+        WordGame game = new WordGame(gameOwner, secret, newGameCost);
+        address gameAddress = address(game);
+        IWordOracle(oracle).addOracleCaller(gameAddress);
+        _addNewGameAddress(gameAddress);
+        emit NewGame(gameAddress, gameOwner);
+        return gameAddress;
     }
     
 
@@ -93,7 +100,7 @@ contract WordGameFactory is IWordGameFactory, WordToken, WordGameFactoryAccess{
         _;
     }
 
-    function fulfillRequest(uint256 requestId, uint wordId, bool validationResult) external onlyOracle(msg.sender){
+    function fulfillRequest(uint256 requestId, uint wordId, bool validationResult) external override onlyOracle(msg.sender){
         address game = _validationRequest[requestId];
         delete _validationRequest[requestId];
         if(game != address(0)){
@@ -107,7 +114,7 @@ contract WordGameFactory is IWordGameFactory, WordToken, WordGameFactoryAccess{
         _;
     }
 
-    function requestValidation(uint256 requestId) external requestValidationCheck(msg.sender, requestId){
+    function requestValidation(uint256 requestId) external override requestValidationCheck(msg.sender, requestId){
         _validationRequest[requestId] = msg.sender;
         IWordOracle(oracle).requestValidation(requestId);
     }
