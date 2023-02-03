@@ -26,6 +26,7 @@ window.mainMenu = document.querySelector("#main-menu");
 window.userAccountFooter = document.querySelector("#user-account-footer");
 window.userAddressesSelector = document.querySelector("#user-account-address");
 window.gameDisplayMenu = document.querySelector("#game-display-menu");
+window.getTokenMenu = document.querySelector("#get-tokens-menu");
 
 window.updateContracts = (() => {
   window.Oracle = new ethers.Contract(
@@ -107,6 +108,7 @@ function DisplayGreetingMessage(){
   window.mainMenu.style.display = "none";
   window.userAccountFooter.style.display = "none";
   window.gameDisplayMenu.style.display = "none";
+  window.getTokenMenu.style.display = "none";
 }
 
 function DisplayMainMenu(){
@@ -115,6 +117,16 @@ function DisplayMainMenu(){
   window.mainMenu.style.display = "block";
   window.userAccountFooter.style.display = "block";
   window.gameDisplayMenu.style.display = "none";
+  window.getTokenMenu.style.display = "none";;
+}
+
+function DisplayGetTokenMenu(){
+  window.initialMessage.style.display = "none";
+  window.greetingMessage.style.display = "none";
+  window.mainMenu.style.display = "none";
+  window.userAccountFooter.style.display = "block";
+  window.gameDisplayMenu.style.display = "none";
+  window.getTokenMenu.style.display = "block";
 }
 
 function DisplayGameMenu(){
@@ -123,7 +135,31 @@ function DisplayGameMenu(){
   window.mainMenu.style.display = "none";
   window.userAccountFooter.style.display = "block";
   window.gameDisplayMenu.style.display = "block";
+  window.getTokenMenu.style.display = "none";
 }
+
+function DisplayCreateGameMenu(){
+
+}
+
+document.querySelector("#get-token-menu-button")
+  .addEventListener("click", DisplayGetTokenMenu);
+
+document.querySelector("#game-list-button")
+  .addEventListener("click", DisplayGameMenu);
+
+document.querySelector("#create-game-button")
+  .addEventListener("click", DisplayCreateGameMenu);
+
+document.querySelectorAll('.display-greeting-button')
+  .forEach((btn) =>{
+    btn.addEventListener("click", DisplayGreetingMessage);
+  });
+
+document.querySelectorAll('.back-to-main-menu').forEach((btn)=>{
+  btn.addEventListener("click", DisplayMainMenu);
+  console.log(btn);
+});
 
 async function LoadAccounts(){
   await RequestUserAccounts();
@@ -166,6 +202,8 @@ function DecryptWord(key, block){
   }
   return word; 
 }
+
+
 
 function RunTest(){
   /*
@@ -231,11 +269,6 @@ function EncryptBlock(key, block){
 }
 
 RunTest();
-
-document.querySelectorAll('.display-main-menu').forEach((btn)=>{
-  btn.addEventListener("click", DisplayMainMenu);
-  console.log(btn);
-});
 
 InitApplication();
 

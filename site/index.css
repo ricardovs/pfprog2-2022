@@ -32,10 +32,11 @@ text-align: center;
 
 form,
 #user-account-footer,
+.game-display-body,
 .greeting-footer,
 .initial-message-form
 {
-padding: 20px;
+padding: 10px;
 border-radius: 5px;
 box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
 }
@@ -142,10 +143,18 @@ background-color: #4CAF50;
 background-color: #FFA000;
 }
 
-.btn-back-main-menu,
+.back-to-main-menu,
 .red-background
 {
 background-color: #990033;
+}
+
+.back-to-main-menu{
+    margin-top: 10px;
+}
+
+.greeting-footer .back-to-main-menu{
+    margin-top: 0px;
 }
 
 .btn-stats-refresh,
@@ -159,6 +168,7 @@ background-color: #0066CC;
 background-color: #003366;
 }
 
+#get-tokens-menu,
 #greeting-message,
 #game-display-menu,
 #main-menu,
@@ -239,27 +249,36 @@ color:blue;
 }
 
 .game-display-body{
-    width: 200px;
+    display: flex;
 }
 
 .game-selection-body{
     color:black;
     max-width: 200px;
+    width: 30%;
+    text-align: center;
 }
 
+
 .game-display-section{
-    display: flex;
+    display: block;
+}
+
+.make-guess-section{
+    margin-bottom: 5px;
 }
 
 .guess-body{
     margin-left: 5px;
-    width: 350px;
+    width: 70%;
+    text-align: center;
 }
 
 select.guess-list,
 select.game-list{
     width: 100%;
     overflow: auto;
+    height: 172px;
 }
 
 .game-list option{

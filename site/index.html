@@ -34,7 +34,7 @@
         </div>
       </div>
       <div class="greeting-footer">
-        <input type="button"  class="display-main-menu blue-background"  value="Go to Menu" />
+        <input type="button"  class="back-to-main-menu blue-background"  value="Go to Menu" />
       </div>
     </div>
     <!-- Main Menu -->
@@ -44,10 +44,26 @@
       </div>
       <div class="section-body">
         <form class="main-menu-form">
-          <input type="button" class="green-background display-game-list"  value="Play GuessWord" />
-          <input type="button" class="dark-blue-background" value="Create GuessWord" />
-          <input type="button" class="blue-background" value="GuessWord Info" />
+          <input type="button" class="blue-background" id="get-token-menu-button" value="Get Tokens" />
+          <input type="button" class="green-background display-game-list" id="game-list-button" value="Play GuessWord" />
+          <input type="button" class="red-background" id="create-game-button" value="Create GuessWord" />
+          <input type="button" class="yellow-background display-greeting-button" value="GuessWord Info" />
         </form>
+      </div>
+    </div>
+    <!-- Get Tokens -->
+    <div id="get-tokens-menu">
+      <div class="section-header">
+        <h1> GuessWord DApp</h1>
+      </div>
+      <div class="section-body get-tokens-body">
+        <div>
+          <label> Ethers Donated: </label>
+          <input type="number" value="0" />
+        </div>
+      </div>
+      <div class="get-tokens-footer">
+        <input type="button" class="red-background back-to-main-menu" value="Back to Menu" />
       </div>
     </div>
     <!-- Game App  Menu -->
@@ -58,13 +74,15 @@
       <div class="game-display-section">
         <div class="game-display-body">
           <div class="game-selection-body">
+            <h3> List of Games</h3>
             <select class="game-list" size="5">
             </select>
             <div class="game-change">
-              <input type="button" class="change-game-button" value="Change Game"/>
+              <input type="button" class="change-game-button" value="Change"/>
             </div>
           </div>
           <div class="guess-body">
+            <h3> List of Guesses</h3>
             <div class="show-guess-made">
               <select class="guess-list" size="5">
               </select>
@@ -74,6 +92,7 @@
             </div>
           </div>
         </div>
+        <input type="button" class="red-background back-to-main-menu" value="Back to Menu" />
       </div>
     </div>
     <!-- Account Selector -->
