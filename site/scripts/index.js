@@ -34,23 +34,31 @@ window.updateContracts = (() => {
     oracleABI,
     window.signer
   );
+  updateFactoryContract();
+  updateGameContract();
+  console.log("updated Contract");
+});
+
+function updateFactoryContract(){
   window.Factory = new ethers.Contract(
     window.factoryAddress,
     factoryABI,
     window.signer
   );
+}
+
+function updateGameContract() {
   window.Game = new ethers.Contract(
     window.gameAddress,
     gameABI,
     window.signer
   );
-});
+}
 
 function updatedSignerContract(){
   window.signer = window.provider.getSigner(window.userAccountFooter.selectedIndex);
   window.updateContracts();
 }
-
 
 function HandleContracError(response){
   response = String(response);
@@ -156,10 +164,25 @@ document.querySelectorAll('.display-greeting-button')
     btn.addEventListener("click", DisplayGreetingMessage);
   });
 
+document.querySelector("#user-account-address")
+  .addEventListener("change", updatedSignerContract);
+
 document.querySelectorAll('.back-to-main-menu').forEach((btn)=>{
   btn.addEventListener("click", DisplayMainMenu);
-  console.log(btn);
 });
+
+document.querySelector("#btn-get-tokens")
+  .addEventListener("click", GetTokensRequest);
+
+
+["change", "keypress", "paste", "input"].forEach((event) => {
+  document.querySelector("#donation-value")
+    .addEventListener(event, UpdateTokenToReceive)
+
+});
+
+document.querySelector("#donation-unit")
+  .addEventListener("change", UpdateTokenToReceive);
 
 async function LoadAccounts(){
   await RequestUserAccounts();
@@ -203,7 +226,62 @@ function DecryptWord(key, block){
   return word; 
 }
 
+function ReadDonationUnit(){
+  let unity = document.querySelector("#donation-unit").value;
+  if(unity == "Wei"){
+    return 0;
+  }
+  if(unity == "Gwei"){
+    return 9;
+  }
+  if(unity == "Finney"){
+    return 15;
+  }
+  if(unity == "Ether"){
+    return 18;
+  }
+  throw Error("Unity not reconized.");
+}
 
+function ReadAmountDonation(){
+  let amount = document.querySelector("#donation-value").value;
+  let dotIndex = amount.indexOf('.');
+  let zerosToAdd = ReadDonationUnit();
+  if(dotIndex == -1){
+    for(let i = 0; i < zerosToAdd; i++){
+      amount += "0";
+    }
+  }else{
+    let a = amount.slice(0,dotIndex);
+    let b = amount.slice(dotIndex+1, dotIndex+1+zerosToAdd);
+    amount = a + b;
+    for(let i = 0; i < zerosToAdd-b.length; i++){
+      amount += "0";
+    }
+  }
+  while((amount.charAt(0)=="0") && (amount.length > 1)){
+    amount = amount.slice(1,amount.length);
+  }
+  return amount;
+}
+
+function UpdateTokenToReceive(){
+  let amount = ReadAmountDonation();
+  let addZeros = 3;
+  for(let i=0; i < addZeros; i++){
+    amount += "0";
+  }
+  while((amount.charAt(0)=="0") && (amount.length > 1)){
+    amount = amount.slice(1,amount.length);
+  }
+  document.querySelector("#input-token-to-receive")
+    .value = amount;
+}
+
+function GetTokensRequest(){
+  let amount = ReadAmountDonation();
+  console.log("Amount: " + String(amount));
+}
 
 function RunTest(){
   /*

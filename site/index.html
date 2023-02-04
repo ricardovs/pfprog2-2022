@@ -57,13 +57,22 @@
         <h1> GuessWord DApp</h1>
       </div>
       <div class="section-body get-tokens-body">
-        <div>
-          <label> Ethers Donated: </label>
-          <input type="number" value="0" />
+        <h3> Ethers Donated: </h3>
+        <div style="display:flex;">
+          <input type="number" id="donation-value" value="0" min="0"/>
+          <select id="donation-unit">
+            <option>Wei</option>
+            <option>Gwei</option>
+            <option>Finney</option>
+            <option>Ether</option>
+          </select>
         </div>
+        <h3>Tokens to receive: </h3>
+        <input type="number" readonly="readonly" id="input-token-to-receive" value="0" min="0" />
       </div>
       <div class="get-tokens-footer">
         <input type="button" class="red-background back-to-main-menu" value="Back to Menu" />
+        <input type="button" id="btn-get-tokens" class="green-background" value="Get tokens" />
       </div>
     </div>
     <!-- Game App  Menu -->
@@ -100,7 +109,7 @@
       <div class="user-account-message section-header">
         <h3> User Address</h3>
       </div>
-      <select name="user-account-address" id="user-account-address" onchange="window.updatedSignerContract();" ></select>
+      <select name="user-account-address" id="user-account-address"></select>
     </div>
     <!-- Importing Ethers.js script -->
     <script

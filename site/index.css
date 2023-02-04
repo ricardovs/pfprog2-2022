@@ -248,8 +248,14 @@ margin-bottom: 1.1em;
 color:blue;
 }
 
+#btn-get-tokens{
+    margin-top: 10px;
+}
+
+.get-tokens-footer,
 .game-display-body{
     display: flex;
+    gap : 5px;
 }
 
 .game-selection-body{
