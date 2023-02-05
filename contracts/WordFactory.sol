@@ -15,6 +15,7 @@ interface IWordGameFactory {
     function isChildGame(address game) external view returns(bool);
     function fulfillRequest(uint256 requestId, uint wordId, bool validationResult) external;
     function requestValidation(uint256 requestId) external;
+    function balanceOf(address user) external returns(uint256);
 }
 
 contract WordGameFactory is IWordGameFactory, WordGameFactoryAccess{
@@ -126,6 +127,10 @@ contract WordGameFactory is IWordGameFactory, WordGameFactoryAccess{
             return;
         }
         IWordGame(game).setWinningWord(wordId);
+    }
+
+    function balanceOf(address user) external view override returns(uint256){
+        return IWordToken(token).balanceOf(user);
     }
 
     fallback() external payable {

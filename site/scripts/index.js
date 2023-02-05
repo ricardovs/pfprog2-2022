@@ -1,20 +1,23 @@
 window.Oracle;
 window.Factory;
+window.Token;
 window.Game;
 
 window.signer;
 window.userAccounts;
+window.userAddress;
 window.key;
 
-window.oracleAddress = "0xd9145CCE52D386f254917e481eB44e9943F39138";
+window.oracleAddress = "";
 window.factoryAddress = "";
+window.tokenAddress = "";
 window.gameAddress = "";
 
-import { oracleABI, factoryABI, gameABI } from './contractsABI.js';
-
+import { oracleABI, factoryABI, gameABI, tokenABI } from './contractsABI.js';
 import {AES_Init, AES_ExpandKey, AES_Encrypt, AES_Decrypt, AES_Done} from './jsaes.js';
 import {hexPrint} from './jsaes.js';
 
+window.BigNumber = window.ethers.BigNumber;
 
 window.useGanache = true; 
 window.provider = GetProvier();
@@ -29,34 +32,65 @@ window.gameDisplayMenu = document.querySelector("#game-display-menu");
 window.getTokenMenu = document.querySelector("#get-tokens-menu");
 
 window.updateContracts = (() => {
+  updateOracleContract();
+  updateTokenContract();
+  updateFactoryContract();
+  updateGameContract();
+});
+
+function updateOracleContract(){
+  if(window.oracleAddress == ""){
+    return;
+  }
   window.Oracle = new ethers.Contract(
     window.oracleAddress,
     oracleABI,
     window.signer
   );
-  updateFactoryContract();
-  updateGameContract();
-  console.log("updated Contract");
-});
+  console.log("Updated Oracle Contract");
+}
 
 function updateFactoryContract(){
+  if(window.factoryAddress == ""){
+    return;
+  }
   window.Factory = new ethers.Contract(
     window.factoryAddress,
     factoryABI,
     window.signer
   );
+  console.log("Updated Factory Contract");
+}
+
+function updateTokenContract(){
+  if(window.tokenAddress == ""){
+    return;
+  }
+  window.Token = new ethers.Contract(
+    window.tokenAddress,
+    tokenABI,
+    window.signer
+  );
+  console.log("Update Token Contract");
 }
 
 function updateGameContract() {
+  if(window.gameAddress == ""){
+    return;
+  }
   window.Game = new ethers.Contract(
     window.gameAddress,
     gameABI,
     window.signer
   );
+  console.log("Updated Game Contract");
 }
 
 function updatedSignerContract(){
-  window.signer = window.provider.getSigner(window.userAccountFooter.selectedIndex);
+  let index = window.userAccountFooter.selectedIndex;
+  let address = window.userAccounts[index];
+  window.signer = window.provider.getSigner(index);
+  window.userAddress =  address;
   window.updateContracts();
 }
 
@@ -265,7 +299,7 @@ function ReadAmountDonation(){
   return amount;
 }
 
-function UpdateTokenToReceive(){
+function CalculateTokensToReceive(){
   let amount = ReadAmountDonation();
   let addZeros = 3;
   for(let i=0; i < addZeros; i++){
@@ -274,13 +308,30 @@ function UpdateTokenToReceive(){
   while((amount.charAt(0)=="0") && (amount.length > 1)){
     amount = amount.slice(1,amount.length);
   }
-  document.querySelector("#input-token-to-receive")
-    .value = amount;
+  return amount;
 }
 
-function GetTokensRequest(){
+function UpdateTokenToReceive(){
+  let amount = CalculateTokensToReceive();
+  let input = document.querySelector("#input-token-to-receive")
+  input.value = amount;
+  input.max  = amount;
+  input.ariaReadOnly = false;
+}
+
+async function balanceOf(account){
+  return await Token.balanceOf(account);
+}
+
+async function balanceOfSelf(){
+  return await balanceOf(signer.getAddress());
+}
+async function GetTokensRequest(){
   let amount = ReadAmountDonation();
-  console.log("Amount: " + String(amount));
+  let token = CalculateTokensToReceive();
+  console.log(balanceOfSelf());
+  await Factory.getTokens(BigNumber.from(token), {value:BigNumber.from(amount)});
+  console.log(balanceOfSelf());
 }
 
 function RunTest(){
@@ -346,7 +397,7 @@ function EncryptBlock(key, block){
   AES_Done();
 }
 
-RunTest();
+//RunTest();
 
 InitApplication();
 
