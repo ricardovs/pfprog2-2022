@@ -8,9 +8,14 @@ import "./WordOracle.sol";
 interface IWordGame{
     function newGuess(uint wordId) external ;
     function newTip(uint tipId) external;
+    function newMultiTip(uint[] calldata wordIds) external;
     function setWinningWord(uint wordId) external;
     function reclaimChallenge(uint8[64] memory _key,  uint256 requestId) external;
+    function reclaimUserReward() external;
+    function reclaimOwnerReward() external;
     function invalidateGame() external;
+    function invalidGameReclaim(uint[] calldata wordIds) external;
+    function closedGame() external;
 }
 
 contract WordGame is IWordGame {
@@ -92,9 +97,30 @@ contract WordGame is IWordGame {
     }
 
     function newTip(uint wordId) external override newTipCheck(wordId) {
+        _newTip(wordId);
+    }
+
+    function _newTip(uint wordId) internal {
         _tips[wordId] = true;
         lastBlockAlive = block.number;
         emit OwnerTip(wordId);
+    }
+
+    modifier MultTipCheck(){
+        require(msg.sender == owner, "ONLY_OWNER");
+        require(_status == GameStatus.OPEN, "NOT_OPEN");
+        require(block.number - lastBlockAlive <= TIP_TIME, "TIP_TIME_EXPIRED");
+        _;
+    }
+
+    function newMultiTip(uint[] calldata wordIds) external override MultTipCheck(){
+        for(uint i = 0; i < wordIds.length; i++){
+            uint wordId = wordIds[i];
+            require(_tips[wordId] == false, "TIP_ALREADY_GIVEN");
+            require(wordId <= LAST_WORD_ID, "INVALID_WORD");
+            require(wordId > 0, "INVALID_WORD");
+            _newTip(wordId); 
+        }
     }
 
     function newGuess(uint wordId) external override newGuessCheck(wordId){
@@ -129,7 +155,7 @@ contract WordGame is IWordGame {
         _;
     }
 
-    function closedGame() external closeGameCheck(){
+    function closedGame() external override closeGameCheck(){
         _status = GameStatus.CLOSE;
         emit ClosedGame();
     }
@@ -159,7 +185,7 @@ contract WordGame is IWordGame {
         _status = GameStatus.PENDIND;
     }
 
-    function hasUserGuessedWord(address user, uint wordId) public view returns(bool){
+    function hasUserGuessedWord(address user, uint wordId) internal view returns(bool){
        address[] memory allUsers =  _guesses[wordId];
        for(uint i = 0; i < allUsers.length; i++){
             if(allUsers[i] == user){
@@ -174,7 +200,7 @@ contract WordGame is IWordGame {
         _;
     }
 
-    function invalidGameReclaim(uint[] calldata wordIds) external onlyInvalidGame(){
+    function invalidGameReclaim(uint[] calldata wordIds) external override onlyInvalidGame(){
         uint256 userReward = 0;
         uint256 rewardPerGuess = premium/numOfGuesses;
         for(uint i = 0; i < wordIds.length; i++){
@@ -201,7 +227,7 @@ contract WordGame is IWordGame {
         _;
     }
     
-    function reclaimUserReward() external userReclaimCheck(){
+    function reclaimUserReward() external override userReclaimCheck(){
         uint qntWinners = _guesses[winningWord].length;
         uint256 reward = premium/qntWinners;
         _usersRewarded[msg.sender] = true;
@@ -215,7 +241,7 @@ contract WordGame is IWordGame {
         _;
     }
     
-    function reclaimOwnerReward() external ownerReclaimCheck(){
+    function reclaimOwnerReward() external override ownerReclaimCheck(){
         _usersRewarded[msg.sender] = true;
         IWordGameFactory(factory).reward(msg.sender, premium);
     }

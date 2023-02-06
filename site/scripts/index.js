@@ -30,6 +30,7 @@ window.userAccountFooter = document.querySelector("#user-account-footer");
 window.userAddressesSelector = document.querySelector("#user-account-address");
 window.gameDisplayMenu = document.querySelector("#game-display-menu");
 window.getTokenMenu = document.querySelector("#get-tokens-menu");
+window.newGamenMenu = document.querySelector("#new-game-display-menu");
 
 window.updateContracts = (() => {
   updateOracleContract();
@@ -151,6 +152,7 @@ function DisplayGreetingMessage(){
   window.userAccountFooter.style.display = "none";
   window.gameDisplayMenu.style.display = "none";
   window.getTokenMenu.style.display = "none";
+  window.newGamenMenu.style.display = "none";
 }
 
 function DisplayMainMenu(){
@@ -159,7 +161,8 @@ function DisplayMainMenu(){
   window.mainMenu.style.display = "block";
   window.userAccountFooter.style.display = "block";
   window.gameDisplayMenu.style.display = "none";
-  window.getTokenMenu.style.display = "none";;
+  window.getTokenMenu.style.display = "none";
+  window.newGamenMenu.style.display = "none";
 }
 
 function DisplayGetTokenMenu(){
@@ -169,6 +172,7 @@ function DisplayGetTokenMenu(){
   window.userAccountFooter.style.display = "block";
   window.gameDisplayMenu.style.display = "none";
   window.getTokenMenu.style.display = "block";
+  window.newGamenMenu.style.display = "none";
 }
 
 function DisplayGameMenu(){
@@ -178,10 +182,17 @@ function DisplayGameMenu(){
   window.userAccountFooter.style.display = "block";
   window.gameDisplayMenu.style.display = "block";
   window.getTokenMenu.style.display = "none";
+  window.newGamenMenu.style.display = "none";
 }
 
 function DisplayCreateGameMenu(){
-
+  window.initialMessage.style.display = "none";
+  window.greetingMessage.style.display = "none";
+  window.mainMenu.style.display = "none";
+  window.userAccountFooter.style.display = "block";
+  window.gameDisplayMenu.style.display = "none";
+  window.getTokenMenu.style.display = "none";
+  window.newGamenMenu.style.display = "block";
 }
 
 document.querySelector("#get-token-menu-button")
@@ -208,11 +219,9 @@ document.querySelectorAll('.back-to-main-menu').forEach((btn)=>{
 document.querySelector("#btn-get-tokens")
   .addEventListener("click", GetTokensRequest);
 
-
 ["change", "keypress", "paste", "input"].forEach((event) => {
   document.querySelector("#donation-value")
-    .addEventListener(event, UpdateTokenToReceive)
-
+    .addEventListener(event, UpdateTokenToReceive);
 });
 
 document.querySelector("#donation-unit")
@@ -312,6 +321,7 @@ function CalculateTokensToReceive(){
 }
 
 function UpdateTokenToReceive(){
+  console.log("Update Receive")
   let amount = CalculateTokensToReceive();
   let input = document.querySelector("#input-token-to-receive")
   input.value = amount;
