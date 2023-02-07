@@ -342,6 +342,10 @@ select.game-list{
     display: flex;
 }
 
+input[disabled]#new-game-button{
+    background-color: #ccc;
+}
+
 .styled-table
 {
 border-collapse: collapse;

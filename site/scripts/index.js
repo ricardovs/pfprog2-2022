@@ -17,6 +17,12 @@ import { oracleABI, factoryABI, gameABI, tokenABI } from './contractsABI.js';
 import {AES_Init, AES_ExpandKey, AES_Encrypt, AES_Decrypt, AES_Done} from './jsaes.js';
 import {hexPrint} from './jsaes.js';
 
+await fetch("../json/WordIds.json")
+.then(response => {
+   return response.json();
+})
+.then(jsondata => window.WordIds = jsondata);
+
 window.BigNumber = window.ethers.BigNumber;
 
 window.useGanache = true; 
@@ -195,6 +201,31 @@ function DisplayCreateGameMenu(){
   window.newGamenMenu.style.display = "block";
 }
 
+function GetWordIndex(word){
+  let index = 1;
+  while(typeof WordIds[index] != 'undefined'){
+    if(word.toLowerCase() == WordIds[index].toLowerCase()){
+      return index;
+    }
+    index++;
+  }
+  return -1;
+}
+
+window.GetWordIndex = GetWordIndex;
+
+function UpdateNewGameSubmit(){
+  let word = document.querySelector("input#secret-word").value;
+  let index = GetWordIndex(word);
+  if(index > 0){
+    document.querySelector("#new-game-button").disabled = false;
+    return index;
+  }else{
+    document.querySelector("#new-game-button").disabled = true;
+    return -1;
+  }
+}
+
 document.querySelector("#get-token-menu-button")
   .addEventListener("click", DisplayGetTokenMenu);
 
@@ -222,6 +253,8 @@ document.querySelector("#btn-get-tokens")
 ["change", "keypress", "paste", "input"].forEach((event) => {
   document.querySelector("#donation-value")
     .addEventListener(event, UpdateTokenToReceive);
+  document.querySelector("#secret-word")
+    .addEventListener(event, UpdateNewGameSubmit);
 });
 
 document.querySelector("#donation-unit")
