@@ -2,6 +2,9 @@
 
 pragma solidity ^0.8.0;
 
+
+import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
+
 import "./WordGame.sol";
 import "./WordToken.sol";
 import "./WordOracle.sol";
@@ -15,15 +18,13 @@ interface IWordGameFactory {
     function isChildGame(address game) external view returns(bool);
     function fulfillRequest(uint256 requestId, uint wordId, bool validationResult) external;
     function requestValidation(uint256 requestId) external;
-    function balanceOf(address user) external returns(uint256);
 }
 
-contract WordGameFactory is IWordGameFactory, WordGameFactoryAccess{
+contract WordGameFactory is IWordGameFactory, WordGameFactoryAccess, ERC20{
 
     // Payable address can receive Ether
     address payable public owner;
     address public oracle;
-    address public token;
     address[] private _games;
     uint256 public gamesCounter;
     uint256 public newGameCost = 100;
@@ -32,10 +33,9 @@ contract WordGameFactory is IWordGameFactory, WordGameFactoryAccess{
     event NewGame(address game, address owner);
 
     // Payable constructor can receive Ether
-    constructor(address _oracle, address _token) payable {
+    constructor(address _oracle) ERC20("Turing", "TUR") payable {
         owner = payable(msg.sender);
         oracle = _oracle;
-        token = _token;
         _grantOracle(oracle);
     }
 
@@ -46,23 +46,23 @@ contract WordGameFactory is IWordGameFactory, WordGameFactoryAccess{
     }
 
     function reward(address user, uint256 amount) external override rewardCheck(user) {
-        IWordToken(token).mint(user, amount);
+        _mint(user, amount);
     }
 
     modifier chargeCheck(address user, uint256 amount){
         require(_isGame(msg.sender), "NOT_AUTHORIZED");
         require(user != address(0), "INVALID_ADDRESS");
-        require(IWordToken(token).balanceOf(user) >= amount, "FEW_TOKENS");
+        require(balanceOf(user) >= amount, "FEW_TOKENS");
         _;
     }
 
     function charge(address user, uint256 amount) external override chargeCheck(user, amount) {
-        IWordToken(token).burn(user, amount);
+        _burn(user, amount);
     }
 
     function getTokens(uint256 amount) external override payable getTokensCheck(amount) returns (bool){        
         _beforePayble();
-        IWordToken(token).mint(msg.sender, amount);    
+        _mint(msg.sender, amount);    
         return true;
     }
 
@@ -73,7 +73,7 @@ contract WordGameFactory is IWordGameFactory, WordGameFactoryAccess{
     function newGame(uint8[64] calldata secret) public override payable returns(address){
         _beforePayble();
         address gameOwner = msg.sender;
-        IWordToken(token).burn(gameOwner, newGameCost);
+        _burn(gameOwner, newGameCost);
         WordGame game = new WordGame(gameOwner, secret, newGameCost);
         address gameAddress = address(game);
         IWordOracle(oracle).addOracleCaller(gameAddress);
@@ -127,10 +127,6 @@ contract WordGameFactory is IWordGameFactory, WordGameFactoryAccess{
             return;
         }
         IWordGame(game).setWinningWord(wordId);
-    }
-
-    function balanceOf(address user) external view override returns(uint256){
-        return IWordToken(token).balanceOf(user);
     }
 
     fallback() external payable {

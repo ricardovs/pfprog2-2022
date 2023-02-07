@@ -10,10 +10,9 @@ window.key;
 
 window.oracleAddress = "";
 window.factoryAddress = "";
-window.tokenAddress = "";
 window.gameAddress = "";
 
-import { oracleABI, factoryABI, gameABI, tokenABI } from './contractsABI.js';
+import { oracleABI, factoryABI, gameABI} from './contractsABI.js';
 import {AES_Init, AES_ExpandKey, AES_Encrypt, AES_Decrypt, AES_Done} from './jsaes.js';
 import {hexPrint} from './jsaes.js';
 
@@ -40,7 +39,6 @@ window.newGamenMenu = document.querySelector("#new-game-display-menu");
 
 window.updateContracts = (() => {
   updateOracleContract();
-  updateTokenContract();
   updateFactoryContract();
   updateGameContract();
 });
@@ -67,18 +65,6 @@ function updateFactoryContract(){
     window.signer
   );
   console.log("Updated Factory Contract");
-}
-
-function updateTokenContract(){
-  if(window.tokenAddress == ""){
-    return;
-  }
-  window.Token = new ethers.Contract(
-    window.tokenAddress,
-    tokenABI,
-    window.signer
-  );
-  console.log("Update Token Contract");
 }
 
 function updateGameContract() {
@@ -260,6 +246,9 @@ document.querySelector("#btn-get-tokens")
 document.querySelector("#donation-unit")
   .addEventListener("change", UpdateTokenToReceive);
 
+document.querySelector("#new-game-button")
+  .addEventListener("click", CreateNewGame);
+
 async function LoadAccounts(){
   await RequestUserAccounts();
   window.userAccounts = await window.provider.listAccounts().then((accounts) =>{
@@ -273,21 +262,48 @@ async function LoadAccounts(){
   updatedSignerContract();
 }
 
+async function CreateNewGame(){
+  let word = document.querySelector("input#secret-word").value;
+  let index = GetWordIndex(word);
+  if(index <= 0){
+    alert("Could not create new game! Check your secret word.");
+    return;
+  }
+  GenerateNewKey();
+  let block = EncryptWord(word.toLowerCase());
+  console.log({"block":block, "key":key})
+  updateFactoryContract();
+  console.log(block)
+  window.gameAddress = await window.Factory.newGame([
+    block[0],block[1],block[2],block[3],block[4],block[5],block[6],block[7],
+    block[8],block[9],block[10],block[11],block[12],block[13],block[14],block[15],
+    block[16],block[17],block[18],block[19],block[20],block[21],block[22],block[23],
+    block[24],block[25],block[26],block[27],block[28],block[29],block[30],block[31],
+    block[32],block[33],block[34],block[35],block[36],block[37],block[38],block[39],
+    block[40],block[41],block[42],block[43],block[44],block[45],block[46],block[47],
+    block[48],block[49],block[50],block[51],block[52],block[53],block[54],block[55],
+    block[56],block[57],block[58],block[59],block[60],block[61],block[62],block[63]
+  ]
+  );
+  console.log({"block":block, "key":key, "game":gameAddress});
+  alert("New Game at : " + String(gameAddress));
+}
+
 function GenerateNewKey(){
-  key = self.crypto.getRandomValues(new Uint8Array(16));
+  window.key = self.crypto.getRandomValues(new Uint8Array(32));
 }
 
 function EncryptWord(word){
   if(word.length >= 50){
     throw new RangeError("The word has more than 50 characters");
   }
-  let block = new Uint8Array(64);
+  let block = ethers.utils.randomBytes(64);
   let i;
   for(i = 0; i < word.length; i++){
     block[63 - i] = word.charCodeAt(i);
   }
   block[63 - 1] = 0;
-  EncryptBlock(block, expandedKey);
+  block = EncryptBlock(key, block);
   return block;
 }
 
@@ -363,7 +379,7 @@ function UpdateTokenToReceive(){
 }
 
 async function balanceOf(account){
-  return await Token.balanceOf(account);
+  return await Factory.balanceOf(account);
 }
 
 async function balanceOfSelf(){
@@ -438,6 +454,7 @@ function EncryptBlock(key, block){
     }
   } 
   AES_Done();
+  return block;
 }
 
 //RunTest();
