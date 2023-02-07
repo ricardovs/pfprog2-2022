@@ -2,51 +2,50 @@
 
 pragma solidity ^0.8.0;
 
-import "@openzeppelin/contracts/access/AccessControl.sol";
 
-
-contract WordOracleAccess is AccessControl{
-    bytes32 public constant PROVIDER_ROLE = keccak256("PROVIDER_ROLE");
-    bytes32 public constant CALLER_ROLE = keccak256("CALLER_ROLE");
-    bytes32 public constant CALLER_ADMIN_ROLE = keccak256("CALLER_ADMIN_ROLE");
+contract WordOracleAccess {
+    mapping(address=> bool) private _providers;
+    mapping(address => bool) private _callers;
+    address public owner;
     bool private _restrictCallers;
 
     constructor() {
-        _setupRole(DEFAULT_ADMIN_ROLE, msg.sender); // make the deployer admin
-        _grantRole(PROVIDER_ROLE, msg.sender); // make the deployer provider
+        owner = msg.sender;
+        _providers[msg.sender] = true; // make the deployer provider
         _restrictCallers = true;
     }
 
     function _isProvider(address account) internal view returns(bool){
-        return hasRole(PROVIDER_ROLE, account);
+        return _providers[account];
     }
 
     function _isCaller(address account) internal view returns(bool){
-        return hasRole(CALLER_ROLE, account);
-    }
-    function _isCallerAdm(address account) internal view returns(bool){
-        return hasRole(CALLER_ADMIN_ROLE, account);
+        return _callers[account];
     }
 
     function _isAdmin(address account) internal view returns(bool){
-        return hasRole(DEFAULT_ADMIN_ROLE, account);
+        return owner == account;
     }
 
     function _grantProvider(address account) internal {
-        _grantRole(PROVIDER_ROLE, account);
+        _providers[account] = true;
     }
     
     function _grantCaller(address account) internal{
-        _grantRole(CALLER_ROLE, account);
+        _callers[account] = true;
     }
 
-    function _grantCallerAdm(address account) internal{
-        _grantRole(CALLER_ADMIN_ROLE, account);
+    function _revokeCaller(address account) internal {
+        delete _callers[account];
     }
 
-    function _callerApprove(address caller) internal view returns(bool){
+    function _revokeProvider(address account) internal{
+        delete _providers[account];
+    }
+
+    function _callerApprove(address account) internal view returns(bool){
         if(_restrictCallers){
-            return _isCaller(caller);
+            return _isCaller(account);
         }
         return true;
     }
@@ -63,7 +62,5 @@ contract WordOracleAccess is AccessControl{
     modifier onlyAdmin(address account){
         require(_isAdmin(account), "NOT_ADMIN");
         _;
-    }
-    
-    
+    }    
 }

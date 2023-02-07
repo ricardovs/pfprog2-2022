@@ -21,7 +21,7 @@ interface IWordGame{
 contract WordGame is IWordGame {
 
     address public factory;
-    address payable public owner;
+    address public owner;
     address public oracle;
 
     enum GameStatus{OPEN, CLOSE, PENDIND, USER_WON, OWNER_WON, INVALID}
@@ -56,9 +56,9 @@ contract WordGame is IWordGame {
     event ClosedGame();
 
     // Payable constructor can receive Ether
-    constructor(address _owner, uint8[64] memory _secret, uint256 _premium) payable{
-        factory = msg.sender;
-        owner = payable(_owner);
+    constructor(address _factory, uint8[64] memory _secret, uint256 _premium) {
+        factory = _factory;
+        owner = msg.sender;
         secret = _secret;
         lastBlockAlive = block.number;
         premium = _premium;
@@ -67,7 +67,7 @@ contract WordGame is IWordGame {
     }
 
     modifier onlyFactory(){
-        require(msg.sender == factory, "ONLY_FACTORY");
+        require( IWordFactory(factory).isValidProvider(msg.sender), "ONLY_FACTORY");
         _;
     }
 
@@ -124,7 +124,7 @@ contract WordGame is IWordGame {
     }
 
     function newGuess(uint wordId) external override newGuessCheck(wordId){
-        IWordGameFactory(factory).charge(msg.sender, guessCost);
+        IWordFactory(factory).charge(msg.sender, guessCost);
         premium += guessCost;
         _guesses[wordId].push(msg.sender);
         lastBlockAlive = block.number;
@@ -181,7 +181,7 @@ contract WordGame is IWordGame {
 
     function reclaimChallenge(uint8[64] memory _key, uint256 requestId) external override reclaimCheck(){
         _setKey(_key);
-        IWordGameFactory(factory).requestValidation(requestId);
+        IWordFactory(factory).requestValidation(requestId);
         _status = GameStatus.PENDIND;
     }
 
@@ -217,7 +217,7 @@ contract WordGame is IWordGame {
                 }
             }
         }
-        IWordGameFactory(factory).reward(msg.sender, userReward);
+        IWordFactory(factory).reward(msg.sender, userReward);
     }
 
     modifier userReclaimCheck(){
@@ -231,7 +231,7 @@ contract WordGame is IWordGame {
         uint qntWinners = _guesses[winningWord].length;
         uint256 reward = premium/qntWinners;
         _usersRewarded[msg.sender] = true;
-        IWordGameFactory(factory).reward(msg.sender, reward);
+        IWordFactory(factory).reward(msg.sender, reward);
     }
 
     modifier ownerReclaimCheck(){
@@ -243,15 +243,6 @@ contract WordGame is IWordGame {
     
     function reclaimOwnerReward() external override ownerReclaimCheck(){
         _usersRewarded[msg.sender] = true;
-        IWordGameFactory(factory).reward(msg.sender, premium);
+        IWordFactory(factory).reward(msg.sender, premium);
     }
-
-    fallback() external payable {
-        owner.transfer(msg.value);
-    }
-
-    receive() external payable { 
-        owner.transfer(msg.value);
-    }
-
 }

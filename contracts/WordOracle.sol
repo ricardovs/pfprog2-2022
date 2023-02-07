@@ -8,6 +8,7 @@ interface IWordOracle{
     function addProvider(address provider) external;
     function removeProvider(address provider) external;
     function setProvidersThreshold(uint threshold) external;
+    function isValidProvider(address account) external view returns(bool);
     function addOracleCaller(address caller) external;
     function removeOracleCaller(address caller) external;
     function requestValidation(uint256 requestId) external returns (bool);
@@ -67,9 +68,13 @@ contract WordOracle is IWordOracle, WordOracleAccess {
     }
 
     function removeProvider(address account) external override removeProviderCheck(account) {      
-        _revokeRole(PROVIDER_ROLE, account);
+        _revokeProvider(account);
         numProviders--;
         emit ProviderRemoved(account);
+    }
+
+    function isValidProvider(address account) external view override returns(bool){
+        return _isProvider(account);
     }
 
     modifier setProvidersThresholdCheck(uint threshold){
@@ -95,21 +100,17 @@ contract WordOracle is IWordOracle, WordOracleAccess {
     }
 
     modifier removeOracleCallerCheck(address account){
-        if(!_isAdmin(msg.sender)){
-            require(_isCallerAdm(msg.sender), "NOT_ADMIN");
-        }
+        require(_isAdmin(msg.sender), "NOT_ADMIN");
         require(_isCaller(account), "NOT_CALLER");
         _;
     }
 
     function removeOracleCaller(address account) external override removeOracleCallerCheck(account){
-        _revokeRole(CALLER_ROLE, account);
+        _revokeCaller(account);
     }
 
     modifier addOracleCallerCheck(address account){
-        if(!_isAdmin(msg.sender)){
-            require(_isCallerAdm(msg.sender), "NOT_ADMIN");
-        }
+        require(_isAdmin(msg.sender), "NOT_ADMIN");
         require(!_isCaller(account), "ALREADY_CALLER");
         _;
     }
@@ -136,7 +137,7 @@ contract WordOracle is IWordOracle, WordOracleAccess {
         emit ValidationReturned(requestId, callerAddress, validationResult, wordId);       
 
         // Fulfill request
-        IWordGameFactory(callerAddress).fulfillRequest(requestId, wordId, validationResult);
+        IWordFactory(callerAddress).fulfillRequest(requestId, wordId, validationResult);
     }
 
     function addProviderVote(uint256 requestId, bool validationResult, uint wordId) external override addProviderVoteCheck(requestId){
