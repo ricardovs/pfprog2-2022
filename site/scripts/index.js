@@ -249,6 +249,9 @@ document.querySelector("#donation-unit")
 document.querySelector("#new-game-button")
   .addEventListener("click", CreateNewGame);
 
+  document.querySelector("#reclaim-button")
+    .addEventListener("click", ReclaimOwner)
+
 async function LoadAccounts(){
   await RequestUserAccounts();
   window.userAccounts = await window.provider.listAccounts().then((accounts) =>{
@@ -292,6 +295,29 @@ async function CreateNewGame(){
 function GenerateNewKey(){
   window.key = self.crypto.getRandomValues(new Uint8Array(32));
 }
+
+
+function ReclaimOwner(){
+  let key = GetReclaimKey();
+  console.log(key);
+}
+function GetReclaimKey(){
+  let text = document.querySelector("#reclaim-key").value;
+  let numbers = text.match(/([0-9]+)/mg);
+  if((typeof numbers == "undefined")|| (numbers == null)){
+    throw Error("Invalid key");
+  }
+  console.log(numbers);
+  if(numbers.length != 32){
+    throw Error("Not valid key size");
+  }
+  let array = new Uint8Array(32);
+  for (let i = 0; i < 32; i++){
+    array[i] = Number.parseInt(numbers[i]);
+  }
+  return array;
+}
+
 
 function EncryptWord(word){
   if(word.length >= 50){

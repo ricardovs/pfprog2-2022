@@ -119,6 +119,23 @@
             <input type="button" id="radom-secret-word-check" class="blue-background" value="Random Word"/>
           </div>
           <input type="button" id="new-game-button" disabled class="green-background" value="Create New Game" />
+          <div>
+            <h3> Your Games</h3>
+            <section id="user-games"></section>
+            <h3>Known Keys</h3>
+            <p> Save your keys!! They will be lost after page reload. Without them you can't get rewards.</p>
+            <div id="known-keys-section">
+            </div>
+            <div id="owner-reclaim-section">
+              <h3> Reclaim your Games </h3>
+              <p> Game List</p>
+              <select id="games-owned-list">   
+              </select>
+              <p> The Game Key </p>
+              <input type="text" id="reclaim-key" value="key" />
+              <input type="button" id="reclaim-button" value="Reclaim Reward" />
+            </div>
+          </div>
         </div>
       </div>
       <input type="button" class="red-background back-to-main-menu" value="Back to Menu" />
