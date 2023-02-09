@@ -24,7 +24,7 @@ await fetch("../json/WordIds.json")
 
 window.BigNumber = window.ethers.BigNumber;
 
-window.useGanache = false; 
+window.useGanache = true; 
 window.provider = GetProvier();
 
 // Creating variables for reusable dom elements
@@ -119,7 +119,7 @@ function GetProvier(){
     return ((window.ethereum != null) ? 
       new ethers.providers.Web3Provider(window.ethereum) : ethers.providers.getDefaultProvider());
   }
-  let ganacheURL = "http://127.0.0.1:7545";
+  let ganacheURL = "http://127.0.0.1:8545";
   return new ethers.providers.JsonRpcProvider(ganacheURL);
 }
   
@@ -130,6 +130,7 @@ async function InitApplication(){
     }
   });
   DisplayGreetingMessage();
+  StartListeningEvents();
 }
 
 async function RequestUserAccounts(){
@@ -298,13 +299,14 @@ async function CreateNewGame(){
     block[56],block[57],block[58],block[59],block[60],block[61],block[62],block[63]
   ]
   ).catch((err) =>{
+    console.log("ERROR");
+    console.log(err);
     if(err.includes("ERC20: ")){
       alert("You don't have enough tokens.");
       throw Error("NOT_TOKENS");
     }
   });
   console.log({"block":block, "key":key, "game":gameAddress});
-  alert("New Game at : " + String(gameAddress));
 }
 
 function GenerateNewKey(){
@@ -514,6 +516,13 @@ async function GetTipsForGame(address){
   return await game.queryFilter(eventFilter)
 }
 
+function StartListeningEvents(){
+  Factory.on("NewGame", (game,owner) => {
+    console.log("NewGame event!");
+    console.log({"owner":owner, "game":game});
+    alert("New Game at: "+String(game));
+  });
+}
 //RunTest();
 
 InitApplication();
