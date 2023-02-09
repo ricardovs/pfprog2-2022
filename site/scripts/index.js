@@ -9,7 +9,7 @@ window.userAddress;
 window.key;
 
 window.oracleAddress = "0x319bD819a49D622c7b93D2A2421A1fb53F9CB196";
-window.factoryAddress = "0x319bD819a49D622c7b93D2A2421A1fb53F9CB196";
+window.factoryAddress = "0x33aa00f772c4bd10a8c5f82310bac8400ce2c38d";
 window.gameAddress = "";
 
 import { oracleABI, factoryABI, gameABI} from './contractsABI.js';
