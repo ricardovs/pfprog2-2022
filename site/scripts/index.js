@@ -8,10 +8,13 @@ window.userAccounts;
 window.userAddress;
 window.key;
 
+window.secretWordId;
+
 window.oracleAddress = "";
 window.factoryAddress = "";
 window.gameAddress = "";
 
+import { utils } from 'mocha';
 import { oracleABI, factoryABI, gameABI} from './contractsABI.js';
 import {AES_Init, AES_ExpandKey, AES_Encrypt, AES_Decrypt, AES_Done} from './jsaes.js';
 import {hexPrint} from './jsaes.js';
@@ -65,6 +68,7 @@ function updateFactoryContract(){
     window.signer
   );
   console.log("Updated Factory Contract");
+  console.log(GetFatoryGames());
 }
 
 function updateGameContract() {
@@ -129,6 +133,23 @@ async function InitApplication(){
     }
   });
   DisplayGreetingMessage();
+  StartLinsening();
+}
+
+function StartLinsening(){
+  let newGameEvent = {
+    'address':factoryAddress,
+    topics:[
+      utils.id("NewGame(address,address)")
+    ]
+  }
+  provider.on(newGameEvent, (log, event) =>{
+    console.log("New game");
+    console.log(log);
+    console.log(event);
+    alert("New game");
+  });
+
 }
 
 async function RequestUserAccounts(){
@@ -249,8 +270,17 @@ document.querySelector("#donation-unit")
 document.querySelector("#new-game-button")
   .addEventListener("click", CreateNewGame);
 
-  document.querySelector("#reclaim-button")
+document.querySelector("#reclaim-button")
     .addEventListener("click", ReclaimOwner)
+
+document.querySelector("#random-secret-word-check")
+  .addEventListener("click", RandomWord);
+
+function RandomWord(){
+  let index = self.crypto.getRandomValues(new Uint32Array(1))[0] % 245363;
+  document.querySelector("#secret-word").value = WordIds[index];
+  UpdateNewGameSubmit();
+}
 
 async function LoadAccounts(){
   await RequestUserAccounts();
@@ -287,7 +317,12 @@ async function CreateNewGame(){
     block[48],block[49],block[50],block[51],block[52],block[53],block[54],block[55],
     block[56],block[57],block[58],block[59],block[60],block[61],block[62],block[63]
   ]
-  );
+  ).catch((err) =>{
+    if(err.includes("ERC20: ")){
+      alert("You don't have enough tokens.");
+      throw Error("NOT_TOKENS");
+    }
+  });
   console.log({"block":block, "key":key, "game":gameAddress});
   alert("New Game at : " + String(gameAddress));
 }
@@ -301,6 +336,7 @@ function ReclaimOwner(){
   let key = GetReclaimKey();
   console.log(key);
 }
+
 function GetReclaimKey(){
   let text = document.querySelector("#reclaim-key").value;
   let numbers = text.match(/([0-9]+)/mg);
@@ -483,7 +519,22 @@ function EncryptBlock(key, block){
   return block;
 }
 
+async function GetFatoryGames(){
+  let array = new Array();
+  let eventFilter = Factory.filters.NewGame();
+  return await Factory.queryFilter(eventFilter)
+}
+
+async function GetTipsForGame(address){
+  let game = new ethers.Contract(
+    address,
+    gameABI,
+    window.signer
+  );
+  let eventFilter = game.filters.OwnerTip();
+  return await game.queryFilter(eventFilter)
+}
+
 //RunTest();
 
 InitApplication();
-
