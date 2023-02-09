@@ -8,8 +8,8 @@ window.userAccounts;
 window.userAddress;
 window.key;
 
-window.oracleAddress = "";
-window.factoryAddress = "";
+window.oracleAddress = "0x319bD819a49D622c7b93D2A2421A1fb53F9CB196";
+window.factoryAddress = "0x319bD819a49D622c7b93D2A2421A1fb53F9CB196";
 window.gameAddress = "";
 
 import { oracleABI, factoryABI, gameABI} from './contractsABI.js';
@@ -24,7 +24,7 @@ await fetch("../json/WordIds.json")
 
 window.BigNumber = window.ethers.BigNumber;
 
-window.useGanache = true; 
+window.useGanache = false; 
 window.provider = GetProvier();
 
 // Creating variables for reusable dom elements

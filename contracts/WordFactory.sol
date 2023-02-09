@@ -6,7 +6,6 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/token/ERC20/ERC20.sol";
 
 import "./WordGame.sol";
-import "./WordToken.sol";
 import "./WordOracle.sol";
 import "./WordFactoryAccess.sol";
 
