@@ -80,10 +80,10 @@ function updateGameContract() {
   console.log("Updated Game Contract");
 }
 
-function updatedSignerContract(){
-  let index = window.userAccountFooter.selectedIndex;
+async function updatedSignerContract(){
+  let index = window.userAddressesSelector.selectedIndex;
   let address = window.userAccounts[index];
-  window.signer = window.provider.getSigner(index);
+  window.signer = await window.provider.getSigner(address);
   window.userAddress =  address;
   window.updateContracts();
 }
@@ -119,8 +119,8 @@ function GetProvier(){
     return ((window.ethereum != null) ? 
       new ethers.providers.Web3Provider(window.ethereum) : ethers.providers.getDefaultProvider());
   }
-  let ganacheURL = "http://127.0.0.1:8545";
-  return new ethers.providers.JsonRpcProvider(ganacheURL);
+  let RpcURL = "http://127.0.0.1:8545";
+  return new ethers.providers.JsonRpcProvider(RpcURL);
 }
   
 async function InitApplication(){

@@ -56,8 +56,9 @@ Esse sistema se assenta sobre as seguintes premissas:  a palavra ser enviada sec
 
 A DApp roda em um servidor Web, logo as seguintes bibliotecas serão necessárias:
 ```
-npm install connect serve-static
-npm install --save-dev cha
+npm install connect
+npm install serve-static
+npm install hardhat
 ```
 
 Para compilar o código fazemos:
@@ -65,9 +66,9 @@ Para compilar o código fazemos:
 npx hardhat compile
 ```
 
-Para rodar os testes:
+Para rodar a rede de testes:
 ```
-npx hardhat test
+npx hardhat node
 ```
 
 ## Uso

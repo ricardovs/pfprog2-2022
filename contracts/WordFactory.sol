@@ -63,7 +63,7 @@ contract WordFactory is IWordFactory, WordFactoryAccess, ERC20{
         return true;
     }
 
-    function isValidProvider(address account) external view returns(bool){
+    function isValidProvider(address account) external view override returns(bool){
         return IWordOracle(oracle).isValidProvider(account);
     }
     function isChildGame(address account) external override view returns(bool){
