@@ -286,8 +286,15 @@ select.guess-list,
 select.game-list{
     width: 100%;
     overflow: auto;
-    height: 172px;
     padding: 0px;
+}
+
+select.game-list{
+    height: 85%;
+}
+
+select.guess-list{
+    height: 172px;
 }
 
 .game-list option{

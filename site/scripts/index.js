@@ -10,8 +10,8 @@ window.key;
 window.secretWord;
 window.allGames = new Array();
 
-window.oracleAddress = "0x319bD819a49D622c7b93D2A2421A1fb53F9CB196";
-window.factoryAddress = "0x33aa00f772c4bd10a8c5f82310bac8400ce2c38d";
+window.oracleAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+window.factoryAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
 window.gameAddress = "";
 
 import {oracleABI, factoryABI, gameABI} from './contractsABI.js';
@@ -233,6 +233,9 @@ document.querySelectorAll('.display-greeting-button')
 
 document.querySelector("#user-account-address")
   .addEventListener("change", updatedSignerContract);
+
+document.querySelector("#game-list")
+  .addEventListener("change", updatedGameAddress);
 
 document.querySelectorAll('.back-to-main-menu').forEach((btn)=>{
   btn.addEventListener("click", DisplayMainMenu);
@@ -604,7 +607,7 @@ function IndexOfOption(select, value){
 }
 
 function UpdateUserGameList(){
-  let gameList = document.querySelector("select.game-list");
+  let gameList = document.querySelector("#game-list");
   window.allGames.forEach((g)=>{
     let game = g["game"];
     if(IndexOfOption(gameList, game) < 0){
@@ -639,6 +642,16 @@ function StartListeningEvents(){
     }
     AddToGameList(game,owner);
  });
+}
+
+async function updatedGameAddress(){
+  let selectGames = document.querySelector("#game-list").selectedOptions;
+  if(selectGames.length != 1){
+    throw Error("Bad game selection");
+  }
+  console.log(String(selectGames[0].innerHTML))
+  window.gameAddress = String(selectGames[0].innerHTML);
+  updateGameContract();
 }
 
 //RunTest();

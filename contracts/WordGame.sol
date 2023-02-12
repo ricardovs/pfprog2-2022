@@ -56,9 +56,9 @@ contract WordGame is IWordGame {
     event ClosedGame();
 
     // Payable constructor can receive Ether
-    constructor(address _factory, uint8[64] memory _secret, uint256 _premium) {
-        factory = _factory;
-        owner = msg.sender;
+    constructor(address _owner, uint8[64] memory _secret, uint256 _premium) {
+        factory = msg.sender;
+        owner = _owner;
         secret = _secret;
         lastBlockAlive = block.number;
         premium = _premium;
@@ -67,7 +67,7 @@ contract WordGame is IWordGame {
     }
 
     modifier onlyFactory(){
-        require( IWordFactory(factory).isValidProvider(msg.sender), "ONLY_FACTORY");
+        require(factory == msg.sender, "ONLY_FACTORY");
         _;
     }
 
