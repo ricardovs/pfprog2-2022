@@ -8,12 +8,13 @@ window.userAccounts;
 window.userAddress;
 window.key;
 window.secretWord;
+window.allGames = new Array();
 
 window.oracleAddress = "0x319bD819a49D622c7b93D2A2421A1fb53F9CB196";
 window.factoryAddress = "0x33aa00f772c4bd10a8c5f82310bac8400ce2c38d";
 window.gameAddress = "";
 
-import { oracleABI, factoryABI, gameABI} from './contractsABI.js';
+import {oracleABI, factoryABI, gameABI} from './contractsABI.js';
 import {AES_Init, AES_ExpandKey, AES_Encrypt, AES_Decrypt, AES_Done} from './jsaes.js';
 import {hexPrint} from './jsaes.js';
 
@@ -66,7 +67,8 @@ function updateFactoryContract(){
     window.signer
   );
   console.log("Updated Factory Contract");
-  console.log(GetFatoryGames());
+  LoadFactoryGames();
+  UpdateOwnerGameList();
 }
 
 function updateGameContract() {
@@ -324,8 +326,9 @@ async function CreateNewGame(){
   ).catch((err) =>{
     console.log("ERROR");
     console.log(err);
-    if(err.includes("ERC20: ")){
+    if(String(err).includes("ERC20: burn amount exceeds balance")){
       alert("You don't have enough tokens.");
+      document.querySelector("#new-game-button").disabled = false;
       throw Error("NOT_TOKENS");
     }
   });
@@ -333,6 +336,15 @@ async function CreateNewGame(){
 
 function GenerateNewKey(){
   window.key = self.crypto.getRandomValues(new Uint8Array(32));
+}
+
+async function LoadFactoryGames(){
+  let games = await GetFatoryGames();
+  games.forEach((g) =>{
+    let game = g.args[0];
+    let owner = g.args[1];
+    AddToGameList(game, owner);  
+  })
 }
 
 function AppendToKnownGames(game, key, word){
@@ -570,17 +582,65 @@ async function GetTipsForGame(address){
   return await game.queryFilter(eventFilter)
 }
 
+function AddToGameList(game, owner){
+  for(let i=0; i < window.allGames.length; i++){
+    if(window.allGames[i]["game"] == game){
+      return;
+    }
+  }
+  window.allGames.push({"game":game,"owner":owner});
+  UpdateUserGameList();
+  UpdateOwnerGameList();
+}
+
+function IndexOfOption(select, value){
+  let options = select.querySelectorAll("option");
+  for(let i=0; i < options.length; i++){
+    if(value == options[i].innerHTML){
+      return i;
+    }
+  }
+  return -1;
+}
+
+function UpdateUserGameList(){
+  let gameList = document.querySelector("select.game-list");
+  window.allGames.forEach((g)=>{
+    let game = g["game"];
+    if(IndexOfOption(gameList, game) < 0){
+      let opt = document.createElement("option");
+      opt.innerHTML = String(game);
+      gameList.appendChild(opt);
+    }
+  });
+}
+
+async function UpdateOwnerGameList(){
+  let ownerList = document.querySelector("#games-owned-list");
+  RemoveAllChilds(ownerList);
+  let owner = await signer.getAddress();
+  window.allGames.forEach((game) =>{
+    if(game["owner"] == owner){
+      let opt = document.createElement("option");
+      opt.innerHTML = String(game["game"]);
+      ownerList.appendChild(opt);
+    }
+  });
+}
+
 function StartListeningEvents(){
   Factory.on("NewGame", (game,owner) => {
     if((owner == window.userAddress) && (window.key != null)){
-      alert("New Game at: "+String(game));
+      alert("New Game at: "+ String(game));
       AppendToKnownGames(game,window.key, window.secretWord);
       window.key = null;
       window.secretWord = null;
       document.querySelector("#new-game-button").disabled = false;
     }
+    AddToGameList(game,owner);
  });
 }
+
 //RunTest();
 
 InitApplication();
