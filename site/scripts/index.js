@@ -7,6 +7,7 @@ window.signer;
 window.userAccounts;
 window.userAddress;
 window.key;
+window.secretWord;
 
 window.oracleAddress = "0x319bD819a49D622c7b93D2A2421A1fb53F9CB196";
 window.factoryAddress = "0x33aa00f772c4bd10a8c5f82310bac8400ce2c38d";
@@ -257,6 +258,26 @@ document.querySelector("#reclaim-button")
 document.querySelector("#random-secret-word-check")
   .addEventListener("click", RandomWord);
 
+
+async function UpdateUserBalance(){
+  let address = window.userAddress;
+  if(typeof address == "undefined"){
+    return;
+  }
+  if(address == null){
+    return;
+  }
+  if(typeof Factory == "undefined"){
+    return;
+  }
+  let balance = await balanceOfSelf();
+  document.querySelectorAll("p.user-balance").forEach((elem)=>{
+    elem.textContent = balance;
+  })
+}
+
+setInterval(UpdateUserBalance, 5000);
+
 function RandomWord(){
   let index = self.crypto.getRandomValues(new Uint32Array(1))[0] % 245363;
   document.querySelector("#secret-word").value = WordIds[index];
@@ -283,8 +304,10 @@ async function CreateNewGame(){
     alert("Could not create new game! Check your secret word.");
     return;
   }
+  document.querySelector("#new-game-button").disabled = true;
+  window.secretWord = word.toLowerCase()
   GenerateNewKey();
-  let block = EncryptWord(word.toLowerCase());
+  let block = EncryptWord(secretWord);
   console.log({"block":block, "key":key})
   updateFactoryContract();
   console.log(block)
@@ -306,13 +329,37 @@ async function CreateNewGame(){
       throw Error("NOT_TOKENS");
     }
   });
-  console.log({"block":block, "key":key, "game":gameAddress});
 }
 
 function GenerateNewKey(){
   window.key = self.crypto.getRandomValues(new Uint8Array(32));
 }
 
+function AppendToKnownGames(game, key, word){
+  let createElementTag = (tag, text) =>{
+    let elem = document.createElement(tag);
+    if(text != null){
+      elem.textContent = text
+    }
+    return elem;
+  }
+
+  let createTitleValue = (title, value) =>{
+    let localDiv = createElementTag("div", null);
+    localDiv.appendChild(createElementTag("h2", title));
+    localDiv.appendChild(createElementTag("p", value));
+    return localDiv;
+  }
+
+  let newGameDiv = document.createElement("div");
+  newGameDiv.classList.add("known-key-item");
+
+  newGameDiv.appendChild(createTitleValue("Address: ", game));
+  newGameDiv.appendChild(createTitleValue("Secret Word: ", word));
+  newGameDiv.appendChild(createTitleValue("Key: ", key));
+
+  document.querySelector("#known-keys-section").appendChild(newGameDiv)
+}
 
 function ReclaimOwner(){
   let key = GetReclaimKey();
@@ -429,12 +476,19 @@ async function balanceOf(account){
 async function balanceOfSelf(){
   return await balanceOf(signer.getAddress());
 }
+
 async function GetTokensRequest(){
-  let amount = ReadAmountDonation();
-  let token = CalculateTokensToReceive();
-  console.log(balanceOfSelf());
-  await Factory.getTokens(BigNumber.from(token), {value:BigNumber.from(amount)});
-  console.log(balanceOfSelf());
+  let amount = BigNumber.from(ReadAmountDonation());
+  let token = BigNumber.from(document.querySelector("#input-token-to-receive").value);
+  if(token.lt(BigNumber.from(0))){
+    alert("Token must be bigger than zero.")
+    throw Error("Invalid Token request");
+  }
+  if(token.gt(BigNumber.from(CalculateTokensToReceive()))){
+    alert("Invalid Token amount");
+    throw Error("Token amount execeds donation");
+  }
+  await Factory.getTokens(token, {value:amount});
 }
 
 function RunTest(){
@@ -518,10 +572,14 @@ async function GetTipsForGame(address){
 
 function StartListeningEvents(){
   Factory.on("NewGame", (game,owner) => {
-    console.log("NewGame event!");
-    console.log({"owner":owner, "game":game});
-    alert("New Game at: "+String(game));
-  });
+    if((owner == window.userAddress) && (window.key != null)){
+      alert("New Game at: "+String(game));
+      AppendToKnownGames(game,window.key, window.secretWord);
+      window.key = null;
+      window.secretWord = null;
+      document.querySelector("#new-game-button").disabled = false;
+    }
+ });
 }
 //RunTest();
 

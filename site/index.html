@@ -56,7 +56,7 @@
       <div class="section-header">
         <h1> GuessWord DApp</h1>
       </div>
-      <div class="section-body get-tokens-body">
+      <div class="section-body container get-tokens-body">
         <h3> Ethers Donated: </h3>
         <div style="display:flex;">
           <input type="number" id="donation-value" value="0" min="0"/>
@@ -69,6 +69,10 @@
         </div>
         <h3>Tokens to receive: </h3>
         <input type="number" id="input-token-to-receive" value="0" min="0" max="0" />
+        <div class="container">
+          <p> Your balance of Tokens is: </h3>
+          <p class="user-balance">0</p>
+        </div>
       </div>
       <div class="get-tokens-footer">
         <input type="button" class="red-background back-to-main-menu" value="Back to Menu" />
@@ -111,30 +115,32 @@
       </div>
       <div class="game-display-section">
         <div class="new-game-display-body">
-          <div class="new-game-selection-body">
-            <div class="password-section">
-              <h3> Secret Word </h3>
-              <input type="text" id="secret-word" />
+          <div class="container">
+            <div class="new-game-selection-body">
+              <div class="password-section">
+                <h3> Secret Word </h3>
+                <input type="text" id="secret-word" />
+              </div>
+              <input type="button" id="random-secret-word-check" class="blue-background" value="Random Word"/>
             </div>
-            <input type="button" id="random-secret-word-check" class="blue-background" value="Random Word"/>
+            <input type="button" id="new-game-button" disabled class="green-background" value="Create New Game" />
           </div>
-          <input type="button" id="new-game-button" disabled class="green-background" value="Create New Game" />
-          <div>
-            <h3> Your Games</h3>
-            <section id="user-games"></section>
-            <h3>Known Keys</h3>
-            <p> Save your keys!! They will be lost after page reload. Without them you can't get rewards.</p>
+          <div class="container">
+            <div class="know-key-message">
+              <h3>Known Keys</h3>
+              <p> Save your keys!! They will be lost after page reload. Without them you can't get rewards.</p>
+            </div>
             <div id="known-keys-section">
             </div>
-            <div id="owner-reclaim-section">
-              <h3> Reclaim your Games </h3>
-              <p> Game List</p>
-              <select id="games-owned-list">   
-              </select>
-              <p> The Game Key </p>
-              <input type="text" id="reclaim-key"  />
-              <input type="button" id="reclaim-button" class="green-background" value="Reclaim Reward" />
-            </div>
+          </div>
+          <div id="owner-reclaim-section" class="container">
+            <h3> Reclaim your Games </h3>
+            <p> Game List</p>
+            <select id="games-owned-list">   
+            </select>
+            <p> The Game Key </p>
+            <input type="text" id="reclaim-key"  />
+            <input type="button" id="reclaim-button" class="green-background" value="Reclaim Reward" />
           </div>
         </div>
       </div>

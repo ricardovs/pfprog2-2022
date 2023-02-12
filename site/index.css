@@ -31,6 +31,7 @@ text-align: center;
 }
 
 form,
+.container,
 #user-account-footer,
 .game-display-body,
 .greeting-footer,
@@ -332,6 +333,33 @@ select.game-list{
 
 #secret-word{
     width: 300px;
+}
+
+#known-keys-section{
+    overflow-wrap: break-word;
+    margin-top: 10px;
+    overflow-y: auto;
+    max-height: 150px;
+}
+
+.known-key-item{
+    font-size: 12px;
+    border: black solid 1px;
+    margin-top: 5px;
+    margin-bottom: 5px;
+    padding-left: 15px ;
+}
+
+.known-key-item div{
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 10px;
+}
+
+.known-key-item p{
+    overflow-wrap: anywhere;
+    font-size: 16px;
 }
 
 #radom-secret-word-check{
