@@ -136,7 +136,7 @@ padding: 10px;
 
 .green-background
 {
-background-color: #4CAF50;
+background-color: #050;
 }
 
 .yellow-background
@@ -169,6 +169,7 @@ background-color: #0066CC;
 background-color: #003366;
 }
 
+#tip-display-section,
 #get-tokens-menu,
 #greeting-message,
 #new-game-display-menu,
@@ -386,8 +387,20 @@ select.guess-list{
     display: flex;
 }
 
-input[disabled]#new-game-button{
+input[type="button"][disabled]{
     background-color: #ccc;
+}
+
+div.tip-line{
+    margin-bottom: 10px;
+    display: flex;
+    gap: 5px;
+}
+
+
+input[type="button"].tip-random-button{
+    background-color: blue;
+    width: 30%;
 }
 
 .styled-table

@@ -71,15 +71,21 @@ function updateFactoryContract(){
   UpdateOwnerGameList();
 }
 
-function updateGameContract() {
+async function updateGameContract() {
   if(window.gameAddress == ""){
     return;
+  }
+  if(window.Game != null){
+    window.Game.removeAllListeners();
   }
   window.Game = new ethers.Contract(
     window.gameAddress,
     gameABI,
     window.signer
   );
+  Game.on("OwnerTip", NewTipEvent);
+  await UpdateTipSectionDisplay();
+  await LoadGameTips();
   console.log("Updated Game Contract");
 }
 
@@ -89,6 +95,7 @@ async function updatedSignerContract(){
   window.signer = await window.provider.getSigner(address);
   window.userAddress =  address;
   window.updateContracts();
+  UpdateTransferEvent();
 }
 
 function HandleContracError(response){
@@ -249,6 +256,18 @@ document.querySelector("#btn-get-tokens")
     .addEventListener(event, UpdateTokenToReceive);
   document.querySelector("#secret-word")
     .addEventListener(event, UpdateNewGameSubmit);
+  ["1", "2", "3"].forEach((id)=>{
+    document.querySelector("#tip-input-"+id)
+      .addEventListener(event,UpdatedTipWords);
+  });
+});
+
+["1", "2", "3"].forEach((id)=>{
+  document.querySelector("#random-tip-"+id)
+    .addEventListener("click", ()=>{
+      document.querySelector("#tip-input-"+id).value = WordIds[RandomWordId()];
+      UpdatedTipWords();
+    });
 });
 
 document.querySelector("#donation-unit")
@@ -261,8 +280,10 @@ document.querySelector("#reclaim-button")
     .addEventListener("click", ReclaimOwner)
 
 document.querySelector("#random-secret-word-check")
-  .addEventListener("click", RandomWord);
+  .addEventListener("click", NewGameRandomWord);
 
+document.querySelector("#btn-send-tips")
+  .addEventListener("click", SendTipsRequest);
 
 async function UpdateUserBalance(){
   let address = window.userAddress;
@@ -283,10 +304,14 @@ async function UpdateUserBalance(){
 
 setInterval(UpdateUserBalance, 5000);
 
-function RandomWord(){
-  let index = self.crypto.getRandomValues(new Uint32Array(1))[0] % 245363;
+function NewGameRandomWord(){
+  let index = RandomWordId();
   document.querySelector("#secret-word").value = WordIds[index];
   UpdateNewGameSubmit();
+}
+
+function RandomWordId(){
+  return self.crypto.getRandomValues(new Uint32Array(1))[0] % 245363
 }
 
 async function LoadAccounts(){
@@ -575,14 +600,20 @@ async function GetFatoryGames(){
   return await Factory.queryFilter(eventFilter)
 }
 
-async function GetTipsForGame(address){
-  let game = new ethers.Contract(
-    address,
-    gameABI,
-    window.signer
-  );
-  let eventFilter = game.filters.OwnerTip();
-  return await game.queryFilter(eventFilter)
+async function GetTipsForGame(){
+  let tips = Array();
+  if(Game == null){
+    return tips;
+  }
+  let eventFilter = Game.filters.OwnerTip();
+  let query = await Game.queryFilter(eventFilter);
+  query.forEach((value)=>{
+    tips.push(
+      Number.parseInt(
+        value.args["wordId"].toString())
+    );
+  })
+  return tips;
 }
 
 function AddToGameList(game, owner){
@@ -642,6 +673,18 @@ function StartListeningEvents(){
     }
     AddToGameList(game,owner);
  });
+ Factory.on("Transfer", NewTransferEvent);
+}
+
+async function NewTransferEvent(from, to, amount){
+  let user = window.userAddress;
+  if((user == from)||(user == to)){
+    let balance = await balanceOfSelf();
+    if(window.userBalance != balance){
+      window.userBalance = balance;
+      alert("Your new balance is: " + String(balance));
+    }
+  }
 }
 
 async function updatedGameAddress(){
@@ -651,7 +694,82 @@ async function updatedGameAddress(){
   }
   console.log(String(selectGames[0].innerHTML))
   window.gameAddress = String(selectGames[0].innerHTML);
-  updateGameContract();
+  await updateGameContract();
+  LoadGameTips();
+}
+
+function isValidTipWords(){
+  let qntValidWords = 0;
+  for(let i = 1; i <= 3; i++){
+    let word = document.querySelector("#tip-input-"+String(i)).value;
+    if(word != ""){
+      if(GetWordIndex(word) < 1){
+        return false;
+      }
+      qntValidWords++;
+    }
+  }
+  return qntValidWords != 0;
+}
+
+function UpdatedTipWords(){
+  let button = document.querySelector("#btn-send-tips");
+  if(isValidTipWords()){
+    button.disabled = false;
+  }else{
+    button.disabled = true;
+  }
+}
+
+async function UpdateTipSectionDisplay(){
+  if(await signer.getAddress() == await Game.owner()){
+    document.querySelector("#tip-display-section").style.display = "block";
+  }else{
+    document.querySelector("#tip-display-section").style.display = "none";
+  }
+}
+
+function SendTipsRequest(){
+  let tips = Array();
+  for(let i = 1; i <= 3; i++){
+    let word = document.querySelector("#tip-input-"+String(i)).value;
+    if(word != ""){
+      let index = GetWordIndex(word) 
+      if(index < 1){
+        alert("Invalid word at: "+String(word));
+        return;
+      }
+      tips.push(index);
+    }
+  }
+  if(tips.length == 0){
+    alert("No valid word given!");
+  }else if(tips.length == 1){
+    Game.newTip(tips[0]);
+  }else if(tips.length == 2){
+    Game.newMultiTip([tips[0], tips[1]]);
+  }else{
+    Game.newMultiTip([tips[0], tips[1], tips[2]]);
+  }
+}
+
+function NewTipEvent(number){
+  let wordId = Number.parseInt(number.toString())
+  console.log("New Tip Event");
+  console.log(wordId);
+  alert("New Tip to game: " + WordIds[wordId]);
+  LoadGameTips();
+}
+
+async function LoadGameTips(){
+  let tips = await GetTipsForGame();
+  let list = document.querySelector("#guess-list");
+  RemoveAllChilds(list);
+  tips.forEach((wordId)=>{
+    let opt = document.createElement("option");
+    opt.innerHTML = String(WordIds[wordId]);
+    list.appendChild(opt);
+  });
 }
 
 //RunTest();

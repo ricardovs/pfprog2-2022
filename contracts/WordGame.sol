@@ -101,6 +101,8 @@ contract WordGame is IWordGame {
     }
 
     function _newTip(uint wordId) internal {
+        IWordFactory(factory).charge(msg.sender, tipCost);
+        premium += tipCost;
         _tips[wordId] = true;
         lastBlockAlive = block.number;
         emit OwnerTip(wordId);
