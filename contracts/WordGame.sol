@@ -10,12 +10,12 @@ interface IWordGame{
     function newTip(uint tipId) external;
     function newMultiTip(uint[] calldata wordIds) external;
     function setWinningWord(uint wordId) external;
-    function reclaimChallenge(uint8[64] memory _key,  uint256 requestId) external;
+    function reclaimChallenge(uint8[32] memory _key,  uint256 requestId) external;
     function reclaimUserReward() external;
     function reclaimOwnerReward() external;
     function invalidateGame() external;
     function invalidGameReclaim(uint[] calldata wordIds) external;
-    function closedGame() external;
+    function closeGame() external;
 }
 
 contract WordGame is IWordGame {
@@ -24,11 +24,11 @@ contract WordGame is IWordGame {
     address public owner;
     address public oracle;
 
-    enum GameStatus{OPEN, CLOSE, PENDIND, USER_WON, OWNER_WON, INVALID}
+    enum GameStatus{OPEN, CLOSE, PENDING, USER_WON, OWNER_WON, INVALID}
     GameStatus private _status; 
 
     uint8[64] public secret;
-    uint8[64] public key;
+    uint8[32] public key;
     bool private _isKeySetted;
     uint public lastBlockAlive;
     uint256 public premium;
@@ -157,7 +157,7 @@ contract WordGame is IWordGame {
         _;
     }
 
-    function closedGame() external override closeGameCheck(){
+    function closeGame() external override closeGameCheck(){
         _status = GameStatus.CLOSE;
         emit ClosedGame();
     }
@@ -174,17 +174,17 @@ contract WordGame is IWordGame {
         _;
     }
 
-    function _setKey(uint8[64] memory _key) private {
+    function _setKey(uint8[32] memory _key) private {
         if(!_isKeySetted){
             key = _key;
             _isKeySetted = true;
         }
     }
 
-    function reclaimChallenge(uint8[64] memory _key, uint256 requestId) external override reclaimCheck(){
+    function reclaimChallenge(uint8[32] memory _key, uint256 requestId) external override reclaimCheck(){
         _setKey(_key);
         IWordFactory(factory).requestValidation(requestId);
-        _status = GameStatus.PENDIND;
+        _status = GameStatus.PENDING;
     }
 
     function hasUserGuessedWord(address user, uint wordId) internal view returns(bool){

@@ -162,6 +162,25 @@ export const oracleABI = [
 		"type": "function"
 	},
 	{
+		"inputs": [
+			{
+				"internalType": "uint256",
+				"name": "requestId",
+				"type": "uint256"
+			}
+		],
+		"name": "isValidRequestId",
+		"outputs": [
+			{
+				"internalType": "bool",
+				"name": "",
+				"type": "bool"
+			}
+		],
+		"stateMutability": "view",
+		"type": "function"
+	},
+	{
 		"inputs": [],
 		"name": "numProviders",
 		"outputs": [
@@ -776,7 +795,7 @@ export const gameABI = [
 		"inputs": [
 			{
 				"internalType": "address",
-				"name": "_factory",
+				"name": "_owner",
 				"type": "address"
 			},
 			{
@@ -865,7 +884,7 @@ export const gameABI = [
 	},
 	{
 		"inputs": [],
-		"name": "closedGame",
+		"name": "closeGame",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -1029,9 +1048,9 @@ export const gameABI = [
 	{
 		"inputs": [
 			{
-				"internalType": "uint8[64]",
+				"internalType": "uint8[32]",
 				"name": "_key",
-				"type": "uint8[64]"
+				"type": "uint8[32]"
 			},
 			{
 				"internalType": "uint256",

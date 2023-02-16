@@ -95,7 +95,6 @@ async function updatedSignerContract(){
   window.signer = await window.provider.getSigner(address);
   window.userAddress =  address;
   window.updateContracts();
-  UpdateTransferEvent();
 }
 
 function HandleContracError(response){
@@ -251,6 +250,9 @@ document.querySelectorAll('.back-to-main-menu').forEach((btn)=>{
 document.querySelector("#btn-get-tokens")
   .addEventListener("click", GetTokensRequest);
 
+document.querySelector("#close-game-button")
+  .addEventListener("click", CloseGameRequest);
+
 ["change", "keypress", "paste", "input"].forEach((event) => {
   document.querySelector("#donation-value")
     .addEventListener(event, UpdateTokenToReceive);
@@ -276,7 +278,7 @@ document.querySelector("#donation-unit")
 document.querySelector("#new-game-button")
   .addEventListener("click", CreateNewGame);
 
-document.querySelector("#reclaim-button")
+document.querySelector("#send-key-button")
     .addEventListener("click", ReclaimOwner)
 
 document.querySelector("#random-secret-word-check")
@@ -401,9 +403,41 @@ function AppendToKnownGames(game, key, word){
   document.querySelector("#known-keys-section").appendChild(newGameDiv)
 }
 
-function ReclaimOwner(){
-  let key = GetReclaimKey();
-  console.log(key);
+async function GetValidRequestId(){
+  let id = self.crypto.getRandomValues(new Uint32Array(1))[0] % 1000;
+  while(!Oracle.isValidRequestId(id)){
+    id = self.crypto.getRandomValues(new Uint32Array(1))[0] % 1000;
+  }
+  return id;
+}
+
+async function CloseGameRequest(){
+  let gameList = document.querySelector("#games-owned-list");
+  let address = gameList.options[gameList.selectedIndex].innerText;
+  console.log(address); 
+  window.gameAddress = address;
+  await updateGameContract()
+  let filter = Game.filters.ClosedGame();
+  await Game.closeGame();
+  await Game.once(filter, alert("Cloased game at "+ address));
+  console.log("Closed game");
+}
+
+async function ReclaimOwner(){
+  let gameList = document.querySelector("#games-owned-list");
+  let address = gameList.options[gameList.selectedIndex].innerText;
+  window.gameAddress = address;
+  updateGameContract();
+  let k = GetReclaimKey();
+  let requestId = await GetValidRequestId();
+  console.log({"requestId":requestId, "k":k});
+  await Game.reclaimChallenge(
+    [
+      k[0],k[1],k[2],k[3],k[4],k[5],k[6],k[7],
+      k[8],k[9],k[10],k[11],k[12],k[13],k[14],k[15],
+      k[16],k[17],k[18],k[19],k[20],k[21],k[22],k[23],
+      k[24],k[25],k[26],k[27],k[28],k[29],k[30],k[31]
+    ], requestId);
 }
 
 function GetReclaimKey(){
@@ -652,12 +686,16 @@ function UpdateUserGameList(){
 async function UpdateOwnerGameList(){
   let ownerList = document.querySelector("#games-owned-list");
   RemoveAllChilds(ownerList);
+  document.querySelector("#close-game-button").disabled = true;
+  document.querySelector("#send-key-button").disabled = true;
   let owner = await signer.getAddress();
   window.allGames.forEach((game) =>{
     if(game["owner"] == owner){
       let opt = document.createElement("option");
       opt.innerHTML = String(game["game"]);
       ownerList.appendChild(opt);
+      document.querySelector("#close-game-button").disabled = false;
+      document.querySelector("#send-key-button").disabled = false;
     }
   });
 }

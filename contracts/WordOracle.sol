@@ -9,6 +9,7 @@ interface IWordOracle{
     function removeProvider(address provider) external;
     function setProvidersThreshold(uint threshold) external;
     function isValidProvider(address account) external view returns(bool);
+    function isValidRequestId(uint requestId) external view returns(bool);
     function addOracleCaller(address caller) external;
     function removeOracleCaller(address caller) external;
     function requestValidation(uint256 requestId) external returns (bool);
@@ -117,6 +118,10 @@ contract WordOracle is IWordOracle, WordOracleAccess {
 
     function addOracleCaller(address account) external override addOracleCallerCheck(account){
         _grantCaller(account);
+    }
+
+    function isValidRequestId(uint requestId) external view override returns(bool){
+        return !pendingRequests[requestId]; 
     }
 
     function requestValidation(uint256 requestId) external override requestValidationCheck(msg.sender) returns(bool){
