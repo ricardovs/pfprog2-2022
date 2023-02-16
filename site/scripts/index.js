@@ -10,7 +10,7 @@ window.key;
 window.secretWord;
 window.allGames = new Array();
 
-window.oracleAddress = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+window.oracleAddress = "0x46aa0386Da0DC5F098EC2734547a27388Aae62BD";
 window.factoryAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
 window.gameAddress = "";
 
@@ -26,7 +26,7 @@ await fetch("../json/WordIds.json")
 
 window.BigNumber = window.ethers.BigNumber;
 
-window.useGanache = true; 
+window.useGanache = false; 
 window.provider = GetProvier();
 
 // Creating variables for reusable dom elements
