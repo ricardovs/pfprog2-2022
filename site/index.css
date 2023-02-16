@@ -327,6 +327,11 @@ select.guess-list{
     background-color: #003;
 }
 
+#user-claim-button{
+    background-color: #003;
+    margin-top: 5px;
+}
+
 #make-guess-button{
     background-color: #050;
 }

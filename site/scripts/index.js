@@ -253,6 +253,9 @@ document.querySelector("#btn-get-tokens")
 document.querySelector("#close-game-button")
   .addEventListener("click", CloseGameRequest);
 
+document.querySelector("#user-claim-button")
+  .addEventListener("click", ReclaimUserReward);
+
 ["change", "keypress", "paste", "input"].forEach((event) => {
   document.querySelector("#donation-value")
     .addEventListener(event, UpdateTokenToReceive);
@@ -317,6 +320,14 @@ function NewGameRandomWord(){
 
 function RandomWordId(){
   return self.crypto.getRandomValues(new Uint32Array(1))[0] % 245363
+}
+
+async function ReclaimUserReward(){
+  await Game.reclaimUserReward().catch((err)=>{
+    alert("Couldn't claim!\n" + String(err));
+    throw Error("Couldn't claim!");
+  });
+  alert("Reward Claimed!");
 }
 
 async function LoadAccounts(){
