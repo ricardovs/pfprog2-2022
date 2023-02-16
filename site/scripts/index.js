@@ -421,9 +421,11 @@ async function CloseGameRequest(){
   window.gameAddress = address;
   await updateGameContract()
   let filter = Game.filters.ClosedGame();
-  await Game.closeGame();
-  await Game.once(filter, alert("Cloased game at "+ address));
-  console.log("Closed game");
+  await Game.closeGame().catch((err) =>{
+    alert("Clouldn't close game!\n" + String(err));
+    throw Error("Couldn't close game");
+  });
+  alert("Cloased game at "+ address);
 }
 
 async function ReclaimOwner(){
@@ -440,7 +442,11 @@ async function ReclaimOwner(){
       k[8],k[9],k[10],k[11],k[12],k[13],k[14],k[15],
       k[16],k[17],k[18],k[19],k[20],k[21],k[22],k[23],
       k[24],k[25],k[26],k[27],k[28],k[29],k[30],k[31]
-    ], requestId);
+    ], requestId).catch((err)=>{
+      alert("Couldn't reclaim premium!\n" + String(err));
+      throw Error("Couldn't close");
+    });
+  alert("Claim requested!");
 }
 
 function GetReclaimKey(){
@@ -782,11 +788,11 @@ async function MekeGuessRequest(){
     alert("Invalid Word");
     return;
   }
-  await Game.makeGuess(id).catch(
-    alert("Could not guess !")
-  ).then(
-    alert("Guessed word: " + word)
-  );
+  await Game.newGuess(id).catch((err) =>{
+    alert("Could not guess !\n"+String(err));
+    throw Error("Coundn't guess");
+  });
+  alert("Guessed word: " + word);
 }
 
 function SendTipsRequest(){
