@@ -30,7 +30,6 @@ contract WordGame is IWordGame {
     uint8[64] public secret;
     uint8[32] public key;
     bool private _isKeySetted;
-    uint public lastBlockAlive;
     uint256 public premium;
     uint public winningWord;
     uint public numOfGuesses;
@@ -38,8 +37,6 @@ contract WordGame is IWordGame {
     mapping (address => bool) private _usersRewarded;
     mapping (address => mapping (uint => bool)) private _invalidGameRewarded;
 
-    uint constant TIP_TIME = 2;
-    uint constant GUESS_TIME = 3;
     uint constant LAST_WORD_ID = 245362;
 
     uint256 tipCost = 10;
@@ -60,7 +57,6 @@ contract WordGame is IWordGame {
         factory = msg.sender;
         owner = _owner;
         secret = _secret;
-        lastBlockAlive = block.number;
         premium = _premium;
         _status = GameStatus.OPEN;
         _isKeySetted = false;
@@ -78,7 +74,6 @@ contract WordGame is IWordGame {
 
     modifier newGuessCheck(uint wordId){
         require(_status == GameStatus.OPEN, "GAME_NOT_OPEN");
-        require(block.number - lastBlockAlive <= GUESS_TIME, "GUESS_TIME_EXPIRED");
         require(wordId <= LAST_WORD_ID, "INVALID_WORD_ID");
         require(wordId > 0, "INVALID_WORD_ID");
         require(!hasUserGuessedWord(msg.sender, wordId), "ALREADY_GUESSED");
@@ -89,7 +84,6 @@ contract WordGame is IWordGame {
     modifier newTipCheck(uint wordId){
         require(msg.sender == owner, "ONLY_OWNER");
         require(_status == GameStatus.OPEN, "NOT_OPEN");
-        require(block.number - lastBlockAlive <= TIP_TIME, "TIP_TIME_EXPIRED");
         require(_tips[wordId] == false, "TIP_ALREADY_GIVEN");
         require(wordId <= LAST_WORD_ID, "INVALID_WORD");
         require(wordId > 0, "INVALID_WORD");        
@@ -104,14 +98,12 @@ contract WordGame is IWordGame {
         IWordFactory(factory).charge(msg.sender, tipCost);
         premium += tipCost;
         _tips[wordId] = true;
-        lastBlockAlive = block.number;
         emit OwnerTip(wordId);
     }
 
     modifier MultTipCheck(){
         require(msg.sender == owner, "ONLY_OWNER");
         require(_status == GameStatus.OPEN, "NOT_OPEN");
-        require(block.number - lastBlockAlive <= TIP_TIME, "TIP_TIME_EXPIRED");
         _;
     }
 
@@ -129,7 +121,6 @@ contract WordGame is IWordGame {
         IWordFactory(factory).charge(msg.sender, guessCost);
         premium += guessCost;
         _guesses[wordId].push(msg.sender);
-        lastBlockAlive = block.number;
         numOfGuesses++;
         emit UserGuess(wordId, msg.sender);
     }

@@ -782,8 +782,11 @@ async function MekeGuessRequest(){
     alert("Invalid Word");
     return;
   }
-  await Game.makeGuess(id);
-  alert("Guessed word: " + word);
+  await Game.makeGuess(id).catch(
+    alert("Could not guess !")
+  ).then(
+    alert("Guessed word: " + word)
+  );
 }
 
 function SendTipsRequest(){
