@@ -279,7 +279,10 @@ document.querySelector("#new-game-button")
   .addEventListener("click", CreateNewGame);
 
 document.querySelector("#send-key-button")
-    .addEventListener("click", ReclaimOwner)
+    .addEventListener("click", ReclaimOwner);
+
+document.querySelector("#make-guess-button")
+  .addEventListener("click", MekeGuessRequest);
 
 document.querySelector("#random-secret-word-check")
   .addEventListener("click", NewGameRandomWord);
@@ -765,6 +768,22 @@ async function UpdateTipSectionDisplay(){
   }else{
     document.querySelector("#tip-display-section").style.display = "none";
   }
+}
+
+async function MekeGuessRequest(){
+  let guessList = document.querySelector("#guess-list");
+  if(guessList.selectedIndex < 0){
+    alert("No guess word selected!");
+    return;
+  }
+  let word = guessList.options[guessList.selectedIndex].innerText;
+  let id = GetWordIndex(word);
+  if(id < 1){
+    alert("Invalid Word");
+    return;
+  }
+  await Game.makeGuess(id);
+  alert("Guessed word: " + word);
 }
 
 function SendTipsRequest(){
