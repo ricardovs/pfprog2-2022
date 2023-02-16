@@ -11,7 +11,7 @@ window.secretWord;
 window.allGames = new Array();
 
 window.oracleAddress = "0x46aa0386Da0DC5F098EC2734547a27388Aae62BD";
-window.factoryAddress = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+window.factoryAddress = "0x16bcAa84eFa4F023b942590D0fa9dA0f519Be02B";
 window.gameAddress = "";
 
 import {oracleABI, factoryABI, gameABI} from './contractsABI.js';
